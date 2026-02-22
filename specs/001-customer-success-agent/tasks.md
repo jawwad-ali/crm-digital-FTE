@@ -75,9 +75,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T018 [P] [US2] Implement escalate_to_human in agent/tools/escalation.py — updates ticket status to "escalated" with reason, returns escalation confirmation — per tool-contracts.md
-- [ ] T019 [US2] Register escalation tool in agent/tools/__init__.py and agent/customer_success_agent.py — verify system prompt guardrails enforce: escalate on refund/legal requests, sentiment < 0.3, no KB match (depends on T018)
-- [ ] T020 [US2] Validate escalation scenarios: (1) refund request → escalated, (2) sentiment < 0.3 → escalated, (3) no KB match → escalated rather than fabricated answer (depends on T019)
+- [X] T018 [P] [US2] Implement escalate_to_human in agent/tools/escalation.py — updates ticket status to "escalated" with reason, returns escalation confirmation — per tool-contracts.md
+- [X] T019 [US2] Register escalation tool in agent/tools/__init__.py and agent/customer_success_agent.py — verify system prompt guardrails enforce: escalate on refund/legal requests, sentiment < 0.3, no KB match (depends on T018)
+- [X] T020 [US2] Validate escalation scenarios: (1) refund request → escalated, (2) sentiment < 0.3 → escalated, (3) no KB match → escalated rather than fabricated answer (depends on T019)
 
 **Checkpoint**: US2 complete. Agent safely escalates all out-of-scope requests. Validates SC-004, SC-008.
 
