@@ -107,8 +107,8 @@
 
 ### Implementation for User Story 4
 
-- [ ] T024 [US4] Review and expand KB seed data in database/migrations/002_seed_knowledge_base.py — ensure 15+ articles cover all product areas, each with clear distinct content for semantic differentiation (depends on T009)
-- [ ] T025 [US4] Validate KB search quality: run 10 test queries (password reset, notification settings, billing, API usage, data export, account deletion, integrations, troubleshooting, security, getting started), verify >= 85% return the correct article in top 3 results. Tune article content if needed (depends on T024)
+- [X] T024 [US4] Review and expand KB seed data in database/migrations/002_seed_knowledge_base.py — ensure 15+ articles cover all product areas, each with clear distinct content for semantic differentiation (depends on T009)
+- [X] T025 [US4] Validate KB search quality: run 10 test queries (password reset, notification settings, billing, API usage, data export, account deletion, integrations, troubleshooting, security, getting started), verify >= 85% return the correct article in top 3 results. Tune article content if needed (depends on T024)
 
 **Checkpoint**: US4 complete. KB semantic search is accurate. Validates SC-003, SC-010.
 

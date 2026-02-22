@@ -223,6 +223,20 @@ ARTICLES: list[dict[str, str]] = [
             "exponential backoff."
         ),
     },
+    {
+        "title": "How to Delete Your Account",
+        "category": "account-management",
+        "content": (
+            "To delete your account, go to Settings > Account > Delete "
+            "Account. You will be asked to confirm by typing your email "
+            "address. Account deletion is permanent and cannot be undone. "
+            "All your personal data, projects you own, and associated files "
+            "will be permanently removed within 30 days. If you are the "
+            "sole Owner of a team, you must transfer ownership before "
+            "deleting your account. We recommend exporting your data first "
+            "using Settings > Data Management > Export."
+        ),
+    },
 ]
 
 
