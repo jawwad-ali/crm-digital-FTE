@@ -54,14 +54,14 @@
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] Implement find_or_create_customer (basic: lookup by email/phone, create if new) and get_customer_history in agent/tools/customer.py — per tool-contracts.md, use RunContextWrapper[AgentContext] for DB pool access
-- [ ] T011 [P] [US1] Implement create_ticket (inserts ticket + conversation in single transaction), update_ticket (with forward-only transition validation: open→in_progress→resolved, any→escalated), and get_ticket in agent/tools/ticket.py — per tool-contracts.md
-- [ ] T012 [P] [US1] Implement search_knowledge_base in agent/tools/knowledge.py — generate query embedding via OpenAI API, cosine similarity query with threshold >= 0.7, return top_k=3 results, empty list if no match — per tool-contracts.md
-- [ ] T013 [P] [US1] Implement save_message and get_conversation_messages in agent/tools/conversation.py — per tool-contracts.md, clamp sentiment to [0.0, 1.0]
-- [ ] T014 [P] [US1] Implement send_response in agent/tools/response.py — verify ticket exists (safety net), fetch channel_configs for max_length/response_style, truncate if needed, save as outbound message, return delivered=true for web (gmail/whatsapp return delivered=false for now) — per tool-contracts.md
-- [ ] T015 [US1] Create agent/tools/__init__.py exporting all US1 tools as a list for agent registration (depends on T010–T014)
-- [ ] T016 [US1] Wire Customer Success Agent definition in agent/customer_success_agent.py — Agent[AgentContext] with name, instructions from prompts.py, all tools from T015, model="gpt-4o", helper function to run agent via Runner.run() (depends on T006, T007, T015)
-- [ ] T017 [US1] Add __main__.py entry point in agent/ for smoke testing — accept a message string + email, create AgentContext, run agent, print result (depends on T016)
+- [X] T010 [P] [US1] Implement find_or_create_customer (basic: lookup by email/phone, create if new) and get_customer_history in agent/tools/customer.py — per tool-contracts.md, use RunContextWrapper[AgentContext] for DB pool access
+- [X] T011 [P] [US1] Implement create_ticket (inserts ticket + conversation in single transaction), update_ticket (with forward-only transition validation: open→in_progress→resolved, any→escalated), and get_ticket in agent/tools/ticket.py — per tool-contracts.md
+- [X] T012 [P] [US1] Implement search_knowledge_base in agent/tools/knowledge.py — generate query embedding via OpenAI API, cosine similarity query with threshold >= 0.7, return top_k=3 results, empty list if no match — per tool-contracts.md
+- [X] T013 [P] [US1] Implement save_message and get_conversation_messages in agent/tools/conversation.py — per tool-contracts.md, clamp sentiment to [0.0, 1.0]
+- [X] T014 [P] [US1] Implement send_response in agent/tools/response.py — verify ticket exists (safety net), fetch channel_configs for max_length/response_style, truncate if needed, save as outbound message, return delivered=true for web (gmail/whatsapp return delivered=false for now) — per tool-contracts.md
+- [X] T015 [US1] Create agent/tools/__init__.py exporting all US1 tools as a list for agent registration (depends on T010–T014)
+- [X] T016 [US1] Wire Customer Success Agent definition in agent/customer_success_agent.py — Agent[AgentContext] with name, instructions from prompts.py, all tools from T015, model="gpt-4o", helper function to run agent via Runner.run() (depends on T006, T007, T015)
+- [X] T017 [US1] Add __main__.py entry point in agent/ for smoke testing — accept a message string + email, create AgentContext, run agent, print result (depends on T016)
 
 **Checkpoint**: US1 complete. Agent handles a happy-path product question end-to-end. Validates SC-001, SC-009, SC-010.
 
