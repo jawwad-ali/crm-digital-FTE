@@ -11,7 +11,7 @@ from agent.context import AgentContext
 
 logger = logging.getLogger(__name__)
 
-_SIMILARITY_THRESHOLD = 0.7
+_SIMILARITY_THRESHOLD = 0.4
 _EMBEDDING_MODEL = "text-embedding-3-small"
 
 
@@ -39,17 +39,18 @@ async def search_knowledge_base(
         return json.dumps({"error": "knowledge base search unavailable"})
 
     # 2. Cosine similarity search — only results >= threshold
+    # Build vector literal inline (safe — values are floats from OpenAI, not user input)
+    vec_literal = "'[" + ",".join(str(float(v)) for v in query_embedding) + "]'"
     try:
         async with pool.acquire() as conn:
             rows = await conn.fetch(
-                "SELECT id, title, content, category, "
-                "  1 - (embedding <=> $1) AS similarity "
-                "FROM knowledge_base "
-                "WHERE embedding IS NOT NULL "
-                "  AND 1 - (embedding <=> $1) >= $2 "
-                "ORDER BY embedding <=> $1 "
-                "LIMIT $3",
-                query_embedding,
+                f"SELECT id, title, content, category, "
+                f"  1 - (embedding <=> {vec_literal}::vector) AS similarity "
+                f"FROM knowledge_base "
+                f"WHERE embedding IS NOT NULL "
+                f"  AND 1 - (embedding <=> {vec_literal}::vector) >= $1 "
+                f"ORDER BY embedding <=> {vec_literal}::vector "
+                f"LIMIT $2",
                 _SIMILARITY_THRESHOLD,
                 top_k,
             )
