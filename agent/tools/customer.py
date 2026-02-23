@@ -22,6 +22,10 @@ async def find_or_create_customer(
 ) -> str:
     """Look up a customer by email or phone. Creates one if not found.
 
+    Returns a customer_id (UUID). You MUST use this exact customer_id value
+    in all subsequent tool calls (create_ticket, save_message, etc.).
+    Do NOT invent or guess customer IDs — always use the one returned here.
+
     Args:
         identifier_type: "email" or "phone".
         identifier_value: The email address or phone number.
@@ -96,6 +100,7 @@ async def find_or_create_customer(
             return json.dumps(
                 {
                     "customer_id": str(customer_id),
+                    "instruction": f"Use customer_id '{customer_id}' for all subsequent tool calls.",
                     "is_new": row is None and link_to_identifier_value is None,
                     "identifiers": [dict(r) for r in idents],
                 },

@@ -6,6 +6,7 @@ import json
 import logging
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -50,6 +51,7 @@ class WebhookPayload(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    load_dotenv()
     app.state.agent_ctx = await build_context()
     logger.info("Agent context created — DB pool and OpenAI client ready")
     yield

@@ -21,11 +21,15 @@ async def search_knowledge_base(
     query: str,
     top_k: int = 3,
 ) -> str:
-    """Search the knowledge base using semantic similarity.
+    """Find matching knowledge base articles for a customer question.
+
+    Returns a list of verified, relevant articles. If the list is non-empty,
+    you MUST use these articles to answer the customer. Only escalate if
+    the returned list is empty.
 
     Args:
-        query: The user's question (will be embedded for cosine similarity search).
-        top_k: Maximum number of results to return (default 3).
+        query: A short search phrase derived from the customer's question.
+        top_k: Maximum number of articles to return (default 3).
     """
     pool = ctx.context.db_pool
     openai = ctx.context.openai_client
@@ -55,20 +59,34 @@ async def search_knowledge_base(
                 top_k,
             )
     except Exception:
-        logger.exception("KB similarity query failed")
+        logger.exception("KB query failed")
         return json.dumps({"error": "knowledge base search unavailable"})
 
-    results = [
+    articles = [
         {
-            "id": str(r["id"]),
             "title": r["title"],
             "content": r["content"],
             "category": r["category"],
-            "similarity": round(r["similarity"], 4),
         }
         for r in rows
     ]
 
-    logger.info("KB search for %r returned %d results", query, len(results))
+    # Log similarity scores for debugging, but don't expose to the LLM
+    for r in rows:
+        logger.info(
+            "KB match: %r — similarity=%.4f", r["title"], r["similarity"]
+        )
+    logger.info("KB search for %r returned %d articles", query, len(articles))
 
-    return json.dumps({"results": results}, default=str)
+    if articles:
+        return json.dumps({
+            "status": "found",
+            "message": f"Found {len(articles)} matching article(s). Use the content below to answer the customer.",
+            "articles": articles,
+        }, default=str)
+    else:
+        return json.dumps({
+            "status": "no_match",
+            "message": "No articles found. You must escalate to a human agent.",
+            "articles": [],
+        }, default=str)
