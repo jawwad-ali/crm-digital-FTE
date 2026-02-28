@@ -30,8 +30,11 @@ async def create_ticket(
 ) -> str:
     """Create a new support ticket and its 1:1 conversation in a single transaction.
 
+    The customer_id MUST be the exact UUID returned by find_or_create_customer.
+    Do NOT pass a made-up or guessed ID — it will fail.
+
     Args:
-        customer_id: UUID of the customer.
+        customer_id: UUID of the customer (from find_or_create_customer result).
         channel: "web", "gmail", or "whatsapp".
         category: e.g. "how-to", "bug-report", "feedback", "billing", "general".
         priority: "low", "medium", "high", or "urgent".
@@ -40,6 +43,15 @@ async def create_ticket(
 
     try:
         async with pool.acquire() as conn:
+            # Pre-validate customer exists to give a clear error
+            exists = await conn.fetchval(
+                "SELECT 1 FROM customers WHERE id = $1", customer_id
+            )
+            if not exists:
+                return json.dumps({
+                    "error": "customer not found — call find_or_create_customer first and use the customer_id from its response"
+                })
+
             async with conn.transaction():
                 ticket_id = await conn.fetchval(
                     "INSERT INTO tickets (customer_id, channel, category, priority) "

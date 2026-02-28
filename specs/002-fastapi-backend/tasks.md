@@ -21,9 +21,9 @@
 
 **Purpose**: Add dependencies and create directory structure
 
-- [ ] T001 [P] Update pyproject.toml — add `fastapi>=0.115.0` and `uvicorn[standard]>=0.34.0` to dependencies, `httpx>=0.28.0` to dev dependencies, add `"api*"` to `[tool.setuptools.packages.find] include`
-- [ ] T002 [P] Create directory structure: `api/__init__.py`, `tests/test_api/__init__.py`
-- [ ] T003 Install new dependencies via `uv pip install -e ".[dev]"`
+- [X] T001 [P] Update pyproject.toml — add `fastapi>=0.115.0` and `uvicorn[standard]>=0.34.0` to dependencies, `httpx>=0.28.0` to dev dependencies, add `"api*"` to `[tool.setuptools.packages.find] include`
+- [X] T002 [P] Create directory structure: `api/__init__.py`, `tests/test_api/__init__.py`
+- [X] T003 Install new dependencies via `uv pip install -e ".[dev]"`
 
 ---
 
@@ -31,8 +31,8 @@
 
 **Purpose**: FastAPI app with lifespan, health check, CORS, and error handling — MUST be complete before endpoint implementation
 
-- [ ] T004 [US4] Create `api/main.py` with FastAPI app, lifespan context manager (`build_context()` on startup, `db_pool.close()` on shutdown), CORS middleware (allow all origins), and global exception handler returning JSON errors
-- [ ] T005 [US4] Add `GET /health` endpoint returning `{"status": "ok"}` — verify server starts with `uvicorn api.main:app --reload`
+- [X] T004 [US4] Create `api/main.py` with FastAPI app, lifespan context manager (`build_context()` on startup, `db_pool.close()` on shutdown), CORS middleware (allow all origins), and global exception handler returning JSON errors
+- [X] T005 [US4] Add `GET /health` endpoint returning `{"status": "ok"}` — verify server starts with `uvicorn api.main:app --reload`
 
 **Checkpoint**: Server starts, health check works, CORS headers present.
 
@@ -42,9 +42,9 @@
 
 **Purpose**: The primary endpoint connecting the frontend to the agent
 
-- [ ] T006 [US1] Define Pydantic models in `api/main.py`: `ChatRequest` (message, email, channel, name), `ChatResponse` (response, correlation_id)
-- [ ] T007 [US1] Implement `POST /api/chat` — set correlation_id, prepend `[Customer: {email}, Channel: {channel}]` to message, call `run_agent()`, return ChatResponse (depends on T004, T006)
-- [ ] T008 [US1] Smoke test: POST a product question to `/api/chat`, verify the agent processes it end-to-end and returns a response
+- [X] T006 [US1] Define Pydantic models in `api/main.py`: `ChatRequest` (message, email, channel, name), `ChatResponse` (response, correlation_id)
+- [X] T007 [US1] Implement `POST /api/chat` — set correlation_id, prepend `[Customer: {email}, Channel: {channel}]` to message, call `run_agent()`, return ChatResponse (depends on T004, T006)
+- [X] T008 [US1] Smoke test: POST a product question to `/api/chat`, verify the agent processes it end-to-end and returns a response
 
 **Checkpoint**: Chat endpoint works — frontend can send messages and receive agent responses.
 
@@ -54,8 +54,8 @@
 
 **Purpose**: Ticket and customer lookup for the frontend
 
-- [ ] T009 [P] [US2] Implement `GET /api/tickets/{ticket_id}` — reuse `get_ticket` tool via `on_invoke_tool()`, return 404 if not found
-- [ ] T010 [P] [US2] Implement `GET /api/customers/{customer_id}/history` — reuse `get_customer_history` tool via `on_invoke_tool()`, return 404 if not found
+- [X] T009 [P] [US2] Implement `GET /api/tickets/{ticket_id}` — reuse `get_ticket` tool via `on_invoke_tool()`, return 404 if not found
+- [X] T010 [P] [US2] Implement `GET /api/customers/{customer_id}/history` — reuse `get_customer_history` tool via `on_invoke_tool()`, return 404 if not found
 
 **Checkpoint**: Frontend can look up tickets and customer history.
 
@@ -65,8 +65,8 @@
 
 **Purpose**: Stub endpoints for Gmail and WhatsApp channel integration
 
-- [ ] T011 [P] [US3] Define `WebhookPayload` Pydantic model (from_address, body) and implement `POST /api/webhooks/gmail` — same pattern as chat but with channel="gmail" and email=from_address
-- [ ] T012 [P] [US3] Implement `POST /api/webhooks/whatsapp` — same pattern as chat but with channel="whatsapp" and phone=from_address
+- [X] T011 [P] [US3] Define `WebhookPayload` Pydantic model (from_address, body) and implement `POST /api/webhooks/gmail` — same pattern as chat but with channel="gmail" and email=from_address
+- [X] T012 [P] [US3] Implement `POST /api/webhooks/whatsapp` — same pattern as chat but with channel="whatsapp" and phone=from_address
 
 **Checkpoint**: Webhook stubs work — Gmail and WhatsApp messages process through the agent.
 
@@ -76,8 +76,8 @@
 
 **Purpose**: Comprehensive API tests with mocked agent
 
-- [ ] T013 Create `tests/test_api/test_main.py` — test all 6 endpoints using `httpx.AsyncClient` with `ASGITransport`. Mock `run_agent` to avoid real OpenAI calls. Test: health check, chat happy path, chat validation error, ticket lookup, ticket not found, customer history, customer not found, gmail webhook, whatsapp webhook, CORS headers, error handling.
-- [ ] T014 Run full test suite (`pytest tests/ -v`) and verify coverage remains >= 80%
+- [X] T013 Create `tests/test_api/test_main.py` — test all 6 endpoints using `httpx.AsyncClient` with `ASGITransport`. Mock `run_agent` to avoid real OpenAI calls. Test: health check, chat happy path, chat validation error, ticket lookup, ticket not found, customer history, customer not found, gmail webhook, whatsapp webhook, CORS headers, error handling.
+- [X] T014 Run full test suite (`pytest tests/ -v`) and verify coverage remains >= 80%
 
 **Checkpoint**: All tests pass, coverage >= 80%.
 
@@ -87,7 +87,7 @@
 
 **Purpose**: End-to-end validation against success criteria
 
-- [ ] T015 Validate all 10 success criteria (SC-001 through SC-010) — start server, test each endpoint manually or programmatically, document pass/fail
+- [X] T015 Validate all 10 success criteria (SC-001 through SC-010) — start server, test each endpoint manually or programmatically, document pass/fail
 
 ---
 

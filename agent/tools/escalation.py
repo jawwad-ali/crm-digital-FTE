@@ -20,11 +20,14 @@ async def escalate_to_human(
 ) -> str:
     """Escalate a ticket to a human support agent.
 
-    Use this when:
+    Use this ONLY when:
     - The customer requests a refund, legal action, or account deletion
     - Sentiment is below 0.3 (very negative)
-    - No knowledge base article matches the query
+    - search_knowledge_base returned ZERO articles (empty list)
     - The request is outside the agent's scope
+
+    Do NOT escalate if search_knowledge_base returned any articles — use
+    those articles to answer the customer instead.
 
     Args:
         ticket_id: UUID of the ticket to escalate.

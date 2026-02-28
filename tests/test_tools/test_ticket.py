@@ -32,7 +32,8 @@ def test_valid_transitions_structure():
 async def test_create_ticket_happy_path(tool_ctx, mock_conn, sample_uuid):
     """Creates ticket + conversation in a single transaction."""
     conv_uuid = uuid.uuid4()
-    mock_conn.fetchval.side_effect = [sample_uuid, conv_uuid]
+    # 1st fetchval: customer existence check, 2nd: ticket INSERT, 3rd: conversation INSERT
+    mock_conn.fetchval.side_effect = [True, sample_uuid, conv_uuid]
 
     result = json.loads(
         await create_ticket.on_invoke_tool(
@@ -49,6 +50,26 @@ async def test_create_ticket_happy_path(tool_ctx, mock_conn, sample_uuid):
     assert result["ticket_id"] == str(sample_uuid)
     assert result["conversation_id"] == str(conv_uuid)
     assert result["status"] == "open"
+
+
+async def test_create_ticket_customer_not_found(tool_ctx, mock_conn, sample_uuid):
+    """Fake customer_id → clear error telling LLM to use find_or_create_customer."""
+    mock_conn.fetchval.return_value = None  # customer doesn't exist
+
+    result = json.loads(
+        await create_ticket.on_invoke_tool(
+            tool_ctx,
+            json.dumps({
+                "customer_id": str(sample_uuid),
+                "channel": "web",
+                "category": "how-to",
+                "priority": "low",
+            }),
+        )
+    )
+
+    assert "error" in result
+    assert "find_or_create_customer" in result["error"]
 
 
 async def test_create_ticket_db_error(tool_ctx, mock_conn, sample_uuid):

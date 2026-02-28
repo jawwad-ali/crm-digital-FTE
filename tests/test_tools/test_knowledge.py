@@ -30,7 +30,7 @@ def test_embedding_model():
 
 
 async def test_search_happy_path(tool_ctx, mock_conn, mock_openai, sample_uuid):
-    """Returns matching articles with similarity scores."""
+    """Returns matching articles when found."""
     mock_conn.fetch.return_value = [
         {
             "id": sample_uuid,
@@ -48,13 +48,15 @@ async def test_search_happy_path(tool_ctx, mock_conn, mock_openai, sample_uuid):
         )
     )
 
-    assert len(result["results"]) == 1
-    assert result["results"][0]["title"] == "How to Reset Your Password"
-    assert result["results"][0]["similarity"] == 0.82
+    assert result["status"] == "found"
+    assert len(result["articles"]) == 1
+    assert result["articles"][0]["title"] == "How to Reset Your Password"
+    # Similarity scores are NOT exposed to the LLM — only in debug logs
+    assert "similarity" not in result["articles"][0]
 
 
 async def test_search_no_results(tool_ctx, mock_conn, mock_openai):
-    """No matching articles → empty results list."""
+    """No matching articles → no_match status with empty articles list."""
     mock_conn.fetch.return_value = []
 
     result = json.loads(
@@ -64,7 +66,8 @@ async def test_search_no_results(tool_ctx, mock_conn, mock_openai):
         )
     )
 
-    assert result["results"] == []
+    assert result["status"] == "no_match"
+    assert result["articles"] == []
 
 
 async def test_search_custom_top_k(tool_ctx, mock_conn, mock_openai, sample_uuid):
@@ -83,7 +86,7 @@ async def test_search_custom_top_k(tool_ctx, mock_conn, mock_openai, sample_uuid
         )
     )
 
-    assert "results" in result
+    assert "articles" in result
 
 
 async def test_search_embedding_error(tool_ctx, mock_openai):
