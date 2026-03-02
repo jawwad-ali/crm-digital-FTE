@@ -98,9 +98,10 @@ def test_agent_context_dataclass():
     assert ctx.openai_client is client
 
 
+@patch("agent.context.create_redis_client", new_callable=AsyncMock, return_value=None)
 @patch("agent.context.create_pool", new_callable=AsyncMock)
 @patch("agent.context.AsyncOpenAI")
-async def test_build_context_with_args(mock_openai_cls, mock_create_pool):
+async def test_build_context_with_args(mock_openai_cls, mock_create_pool, mock_redis):
     """build_context with explicit dsn + api_key."""
     from agent.context import AgentContext, build_context
 
@@ -112,11 +113,13 @@ async def test_build_context_with_args(mock_openai_cls, mock_create_pool):
     assert isinstance(ctx, AgentContext)
     mock_create_pool.assert_awaited_once_with(dsn="postgresql://test")
     mock_openai_cls.assert_called_once_with(api_key="sk-test")
+    mock_redis.assert_awaited_once()
 
 
+@patch("agent.context.create_redis_client", new_callable=AsyncMock, return_value=None)
 @patch("agent.context.create_pool", new_callable=AsyncMock)
 @patch("agent.context.AsyncOpenAI")
-async def test_build_context_reads_env(mock_openai_cls, mock_create_pool):
+async def test_build_context_reads_env(mock_openai_cls, mock_create_pool, mock_redis):
     """build_context with None args → reads env vars."""
     from agent.context import build_context
 
@@ -127,6 +130,7 @@ async def test_build_context_reads_env(mock_openai_cls, mock_create_pool):
 
     mock_create_pool.assert_awaited_once_with(dsn=None)
     mock_openai_cls.assert_called_once_with(api_key=None)
+    mock_redis.assert_awaited_once()
 
 
 # ── agent/prompts.py — SYSTEM_PROMPT ────────────────────────────────────

@@ -7,6 +7,7 @@ import logging
 
 from agents import RunContextWrapper, function_tool
 
+from agent.cache import TTL_KB_SEARCH, get_cached, make_kb_cache_key, set_cached
 from agent.context import AgentContext
 
 logger = logging.getLogger(__name__)
@@ -33,6 +34,16 @@ async def search_knowledge_base(
     """
     pool = ctx.context.db_pool
     openai = ctx.context.openai_client
+    redis_client = ctx.context.redis_client
+
+    # ── Cache check ─────────────────────────────────────────────────
+    cache_key = make_kb_cache_key(query, top_k)
+    cached = await get_cached(redis_client, cache_key)
+    if cached is not None:
+        logger.info("KB cache HIT for %r", query)
+        return json.dumps(cached, default=str)
+
+    # ── Cache MISS — full semantic search pipeline ──────────────────
 
     # 1. Generate embedding for the query
     try:
@@ -79,14 +90,19 @@ async def search_knowledge_base(
     logger.info("KB search for %r returned %d articles", query, len(articles))
 
     if articles:
-        return json.dumps({
+        result = {
             "status": "found",
             "message": f"Found {len(articles)} matching article(s). Use the content below to answer the customer.",
             "articles": articles,
-        }, default=str)
+        }
     else:
-        return json.dumps({
+        result = {
             "status": "no_match",
             "message": "No articles found. You must escalate to a human agent.",
             "articles": [],
-        }, default=str)
+        }
+
+    # ── Cache store (both "found" and "no_match") ──────────────────
+    await set_cached(redis_client, cache_key, result, TTL_KB_SEARCH)
+
+    return json.dumps(result, default=str)

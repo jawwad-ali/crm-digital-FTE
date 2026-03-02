@@ -7,6 +7,12 @@ import logging
 
 from agents import RunContextWrapper, function_tool
 
+from agent.cache import (
+    TTL_CHANNEL_CONFIG,
+    get_cached,
+    make_channel_config_key,
+    set_cached,
+)
 from agent.context import AgentContext
 
 logger = logging.getLogger(__name__)
@@ -33,6 +39,7 @@ async def send_response(
             conversation if not provided.
     """
     pool = ctx.context.db_pool
+    redis_client = ctx.context.redis_client
 
     try:
         async with pool.acquire() as conn:
@@ -65,11 +72,17 @@ async def send_response(
                         conversation_id,
                     )
 
-            # 2. Fetch channel config for formatting
-            config = await conn.fetchrow(
-                "SELECT max_length, response_style FROM channel_configs WHERE channel = $1",
-                channel,
-            )
+            # 2. Fetch channel config for formatting (cache-aside)
+            cache_key = make_channel_config_key(channel)
+            config = await get_cached(redis_client, cache_key)
+            if config is None:
+                row = await conn.fetchrow(
+                    "SELECT max_length, response_style FROM channel_configs WHERE channel = $1",
+                    channel,
+                )
+                if row:
+                    config = dict(row)
+                    await set_cached(redis_client, cache_key, config, TTL_CHANNEL_CONFIG)
 
             # 3. Truncate content to max_length
             if config and len(content) > config["max_length"]:

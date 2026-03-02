@@ -79,3 +79,33 @@ def tool_ctx(agent_context):
 def sample_uuid():
     """A deterministic UUID for assertions."""
     return uuid.UUID("12345678-1234-5678-1234-567812345678")
+
+
+# ---------------------------------------------------------------------------
+# Redis / cache fixtures
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+async def mock_redis():
+    """In-memory Redis via fakeredis — async, decode_responses=True."""
+    import fakeredis.aioredis
+
+    client = fakeredis.aioredis.FakeRedis(decode_responses=True)
+    yield client
+    await client.aclose()
+
+
+@pytest.fixture
+def agent_context_with_cache(mock_pool, mock_openai, mock_redis):
+    """AgentContext wired to mock pool + mock OpenAI + fakeredis."""
+    return AgentContext(
+        db_pool=mock_pool, openai_client=mock_openai, redis_client=mock_redis
+    )
+
+
+@pytest.fixture
+def tool_ctx_with_cache(agent_context_with_cache):
+    """RunContextWrapper with cache-enabled AgentContext."""
+    from agents import RunContextWrapper
+
+    return RunContextWrapper(context=agent_context_with_cache)

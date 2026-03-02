@@ -25,3 +25,6 @@
 - `docker compose up` — start local dev environment
 - `pytest tests/` — run test suite
 - `uvicorn api.main:app --reload` — run FastAPI dev server
+
+
+<!-- redis claude conversation:  claude -r 33cfbad0-591a-4812-abd6-ba325c84b642 -->

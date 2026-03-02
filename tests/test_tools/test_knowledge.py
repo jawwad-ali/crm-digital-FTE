@@ -116,3 +116,73 @@ async def test_search_db_error(tool_ctx, mock_conn, mock_openai):
     )
 
     assert "error" in result
+
+
+# ── Cache integration ────────────────────────────────────────────────
+
+
+async def test_cache_hit_skips_openai_and_db(
+    tool_ctx_with_cache, mock_conn, mock_openai, sample_uuid
+):
+    """Second identical query returns cached result — OpenAI and DB not called again."""
+    # First call: cache MISS — full pipeline runs
+    mock_conn.fetch.return_value = [
+        {
+            "id": sample_uuid,
+            "title": "Reset Password",
+            "content": "Go to Settings > Security.",
+            "category": "account-management",
+            "similarity": 0.85,
+        },
+    ]
+
+    first = json.loads(
+        await search_knowledge_base.on_invoke_tool(
+            tool_ctx_with_cache,
+            json.dumps({"query": "password reset"}),
+        )
+    )
+    assert first["status"] == "found"
+    assert len(first["articles"]) == 1
+
+    # Record call counts after first invocation
+    embedding_calls_after_first = mock_openai.embeddings.create.call_count
+    db_calls_after_first = mock_conn.fetch.call_count
+
+    # Second call: same query — cache HIT
+    second = json.loads(
+        await search_knowledge_base.on_invoke_tool(
+            tool_ctx_with_cache,
+            json.dumps({"query": "password reset"}),
+        )
+    )
+
+    # Same result returned
+    assert second == first
+
+    # OpenAI and DB were NOT called again
+    assert mock_openai.embeddings.create.call_count == embedding_calls_after_first
+    assert mock_conn.fetch.call_count == db_calls_after_first
+
+
+async def test_cache_miss_no_redis(tool_ctx, mock_conn, mock_openai, sample_uuid):
+    """When redis_client is None, search still works (full pipeline, no cache)."""
+    mock_conn.fetch.return_value = [
+        {
+            "id": sample_uuid,
+            "title": "Upgrade Plan",
+            "content": "Go to Billing > Upgrade.",
+            "category": "billing",
+            "similarity": 0.90,
+        },
+    ]
+
+    result = json.loads(
+        await search_knowledge_base.on_invoke_tool(
+            tool_ctx,
+            json.dumps({"query": "upgrade subscription"}),
+        )
+    )
+
+    assert result["status"] == "found"
+    assert len(result["articles"]) == 1

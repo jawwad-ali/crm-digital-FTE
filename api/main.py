@@ -53,8 +53,11 @@ class WebhookPayload(BaseModel):
 async def lifespan(app: FastAPI):
     load_dotenv()
     app.state.agent_ctx = await build_context()
-    logger.info("Agent context created — DB pool and OpenAI client ready")
+    logger.info("Agent context created — DB pool, OpenAI client, and Redis ready")
     yield
+    if app.state.agent_ctx.redis_client is not None:
+        await app.state.agent_ctx.redis_client.aclose()
+        logger.info("Redis connection closed")
     await app.state.agent_ctx.db_pool.close()
     logger.info("DB pool closed")
 

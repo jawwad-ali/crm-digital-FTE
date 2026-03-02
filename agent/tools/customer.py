@@ -7,6 +7,13 @@ import logging
 
 from agents import RunContextWrapper, function_tool
 
+from agent.cache import (
+    TTL_CUSTOMER_LOOKUP,
+    get_cached,
+    invalidate,
+    make_customer_lookup_key,
+    set_cached,
+)
 from agent.context import AgentContext
 
 logger = logging.getLogger(__name__)
@@ -34,9 +41,18 @@ async def find_or_create_customer(
             the customer found by this existing value (cross-channel linking).
     """
     pool = ctx.context.db_pool
+    redis_client = ctx.context.redis_client
 
     if not identifier_value:
         return json.dumps({"error": "identifier_value must not be empty"})
+
+    # ── Cache check (skip for linking — those modify data) ──────────
+    cache_key = make_customer_lookup_key(identifier_type, identifier_value)
+    if not link_to_identifier_value:
+        cached = await get_cached(redis_client, cache_key)
+        if cached is not None:
+            logger.info("Customer cache HIT for %s:%s", identifier_type, identifier_value)
+            return json.dumps(cached, default=str)
 
     try:
         async with pool.acquire() as conn:
@@ -73,6 +89,10 @@ async def find_or_create_customer(
                     _channel_from_type(identifier_type),
                 )
                 logger.info("Linked %s to existing customer %s", identifier_value, customer_id)
+
+                # T019: Invalidate stale cache for the linked identifier
+                old_key = make_customer_lookup_key("email", link_to_identifier_value)
+                await invalidate(redis_client, old_key)
             else:
                 # 3. Brand new customer
                 customer_id = await conn.fetchval(
@@ -97,15 +117,17 @@ async def find_or_create_customer(
                 customer_id,
             )
 
-            return json.dumps(
-                {
-                    "customer_id": str(customer_id),
-                    "instruction": f"Use customer_id '{customer_id}' for all subsequent tool calls.",
-                    "is_new": row is None and link_to_identifier_value is None,
-                    "identifiers": [dict(r) for r in idents],
-                },
-                default=str,
-            )
+            result = {
+                "customer_id": str(customer_id),
+                "instruction": f"Use customer_id '{customer_id}' for all subsequent tool calls.",
+                "is_new": row is None and link_to_identifier_value is None,
+                "identifiers": [dict(r) for r in idents],
+            }
+
+            # ── Cache store ─────────────────────────────────────────
+            await set_cached(redis_client, cache_key, result, TTL_CUSTOMER_LOOKUP)
+
+            return json.dumps(result, default=str)
     except Exception:
         logger.exception("Failed to find or create customer for %s", identifier_value)
         return json.dumps({"error": "customer lookup failed — please try again"})

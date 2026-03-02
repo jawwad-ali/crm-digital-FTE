@@ -175,3 +175,57 @@ async def test_send_db_error(tool_ctx, mock_conn):
     )
 
     assert "error" in result
+
+
+# ── Cache integration ────────────────────────────────────────────────
+
+
+async def test_channel_config_cache_hit(
+    tool_ctx_with_cache, mock_conn, sample_uuid
+):
+    """Second call with same channel uses cached config — DB fetchrow for config skipped."""
+    conv_id = str(uuid.uuid4())
+    ticket_id = str(sample_uuid)
+
+    # First call: cache MISS — fetchrow returns config + saved message
+    mock_conn.fetchrow.side_effect = [
+        {"max_length": 5000, "response_style": "formal"},  # channel config (DB hit)
+        {"id": sample_uuid, "created_at": "2024-01-01"},   # saved message
+    ]
+
+    first = json.loads(
+        await send_response.on_invoke_tool(
+            tool_ctx_with_cache,
+            json.dumps({
+                "conversation_id": conv_id,
+                "channel": "web",
+                "content": "First response.",
+                "ticket_id": ticket_id,
+            }),
+        )
+    )
+    assert first["message_id"] == str(sample_uuid)
+
+    fetchrow_count_after_first = mock_conn.fetchrow.call_count  # should be 2
+
+    # Second call: cache HIT — only saved message fetchrow runs (config from cache)
+    msg_uuid = uuid.uuid4()
+    mock_conn.fetchrow.side_effect = [
+        {"id": msg_uuid, "created_at": "2024-01-02"},  # saved message only
+    ]
+
+    second = json.loads(
+        await send_response.on_invoke_tool(
+            tool_ctx_with_cache,
+            json.dumps({
+                "conversation_id": conv_id,
+                "channel": "web",
+                "content": "Second response.",
+                "ticket_id": ticket_id,
+            }),
+        )
+    )
+    assert second["message_id"] == str(msg_uuid)
+
+    # Only 1 more fetchrow call (saved message), NOT 2 (config was cached)
+    assert mock_conn.fetchrow.call_count == fetchrow_count_after_first + 1

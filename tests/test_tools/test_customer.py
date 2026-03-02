@@ -233,3 +233,84 @@ async def test_get_history_db_error(tool_ctx, mock_conn, sample_uuid):
     )
 
     assert "error" in result
+
+
+# ── Cache integration ────────────────────────────────────────────────
+
+
+async def test_customer_cache_hit(
+    tool_ctx_with_cache, mock_conn, sample_uuid
+):
+    """Second call with same email uses cached result — DB fetchrow not called again."""
+    # First call: cache MISS → DB lookup
+    mock_conn.fetchrow.return_value = {"customer_id": sample_uuid}
+    mock_conn.fetch.return_value = [
+        {"identifier_type": "email", "identifier_value": "ali@test.com", "channel": "gmail"}
+    ]
+
+    first = json.loads(
+        await find_or_create_customer.on_invoke_tool(
+            tool_ctx_with_cache,
+            json.dumps({"identifier_type": "email", "identifier_value": "ali@test.com"}),
+        )
+    )
+    assert first["customer_id"] == str(sample_uuid)
+
+    fetchrow_count_after_first = mock_conn.fetchrow.call_count
+
+    # Second call: cache HIT → no DB
+    second = json.loads(
+        await find_or_create_customer.on_invoke_tool(
+            tool_ctx_with_cache,
+            json.dumps({"identifier_type": "email", "identifier_value": "ali@test.com"}),
+        )
+    )
+    assert second == first
+    assert mock_conn.fetchrow.call_count == fetchrow_count_after_first
+
+
+async def test_customer_link_invalidates_cache(
+    tool_ctx_with_cache, mock_conn, mock_redis, sample_uuid
+):
+    """Cross-channel linking invalidates stale cache and caches new identifier."""
+    from agent.cache import _PREFIX, make_customer_lookup_key
+
+    # Seed cache for the original email lookup
+    email_key = make_customer_lookup_key("email", "ali@test.com")
+    await mock_redis.set(
+        f"{_PREFIX}{email_key}",
+        json.dumps({"customer_id": str(sample_uuid), "identifiers": []}),
+    )
+
+    # Link a phone number to the customer found via email
+    mock_conn.fetchrow.side_effect = [
+        None,                          # phone not found
+        {"customer_id": sample_uuid},  # found via link_to
+    ]
+    mock_conn.fetch.return_value = [
+        {"identifier_type": "email", "identifier_value": "ali@test.com", "channel": "gmail"},
+        {"identifier_type": "phone", "identifier_value": "+1234", "channel": "whatsapp"},
+    ]
+
+    result = json.loads(
+        await find_or_create_customer.on_invoke_tool(
+            tool_ctx_with_cache,
+            json.dumps({
+                "identifier_type": "phone",
+                "identifier_value": "+1234",
+                "link_to_identifier_value": "ali@test.com",
+            }),
+        )
+    )
+
+    assert result["customer_id"] == str(sample_uuid)
+    assert len(result["identifiers"]) == 2
+
+    # Old email cache should be invalidated
+    old_cached = await mock_redis.get(f"{_PREFIX}{email_key}")
+    assert old_cached is None
+
+    # New phone key should be cached
+    phone_key = make_customer_lookup_key("phone", "+1234")
+    new_cached = await mock_redis.get(f"{_PREFIX}{phone_key}")
+    assert new_cached is not None
