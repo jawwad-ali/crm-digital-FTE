@@ -19,9 +19,9 @@
 
 **Purpose**: Add Redis dependencies and install
 
-- [ ] T001 Add `redis[hiredis]>=5.0.0` to dependencies and `fakeredis[json]>=2.21.0` to dev dependencies in `pyproject.toml`
-- [ ] T002 Install dependencies via `uv pip install -e ".[dev]"`
-- [ ] T003 [P] Add `REDIS_URL=redis://localhost:6379` to `.env.example`
+- [x] T001 Add `redis[hiredis]>=5.0.0` to dependencies and `fakeredis[json]>=2.21.0` to dev dependencies in `pyproject.toml`
+- [x] T002 Install dependencies via `uv pip install -e ".[dev]"`
+- [x] T003 [P] Add `REDIS_URL=redis://localhost:6379` to `.env.example`
 
 ---
 
@@ -31,9 +31,9 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Create `agent/cache.py` with TTL constants (`TTL_KB_SEARCH=3600`, `TTL_CHANNEL_CONFIG=86400`, `TTL_CUSTOMER_LOOKUP=3600`), key prefix `_PREFIX="crm:"`, and `create_redis_client()` function per `contracts/cache-contracts.md`
-- [ ] T005 Add `get_cached()` and `set_cached()` functions to `agent/cache.py` with JSON serialization, prefix handling, and graceful exception handling per contracts
-- [ ] T006 Add `invalidate()` and `invalidate_pattern()` functions to `agent/cache.py` with SCAN-based pattern delete per contracts
+- [x] T004 Create `agent/cache.py` with TTL constants (`TTL_KB_SEARCH=3600`, `TTL_CHANNEL_CONFIG=86400`, `TTL_CUSTOMER_LOOKUP=3600`), key prefix `_PREFIX="crm:"`, and `create_redis_client()` function per `contracts/cache-contracts.md`
+- [x] T005 Add `get_cached()` and `set_cached()` functions to `agent/cache.py` with JSON serialization, prefix handling, and graceful exception handling per contracts
+- [x] T006 Add `invalidate()` and `invalidate_pattern()` functions to `agent/cache.py` with SCAN-based pattern delete per contracts
 - [ ] T007 Add key helper functions to `agent/cache.py`: `make_kb_cache_key()` (SHA-256 hash of normalized query), `make_channel_config_key()`, `make_customer_lookup_key()` per contracts
 - [ ] T008 Add `redis_client: redis.asyncio.Redis | None = None` field to `AgentContext` dataclass and call `create_redis_client()` in `build_context()` in `agent/context.py`
 - [ ] T009 Add Redis `aclose()` to FastAPI lifespan shutdown (guarded by `if is not None`) in `api/main.py`
