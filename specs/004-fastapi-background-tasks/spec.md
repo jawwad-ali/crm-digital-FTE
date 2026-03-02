@@ -5,6 +5,16 @@
 **Status**: Draft
 **Input**: User description: "Background tasks implementation using FastAPI background tasks feature"
 
+## Clarifications
+
+### Session 2026-03-03
+
+- Q: Should async or sync be the default API behavior? → A: Async is the default. All endpoints return a tracking ID immediately. Sync mode available via `?sync=true` query parameter as a developer/testing escape hatch.
+- Q: What happens to in-flight jobs if the server restarts? → A: Timeout-based expiry — jobs stuck in "processing" beyond a threshold (5 minutes) are auto-marked as "failed" when polled.
+- Q: How long should completed job results be stored? → A: 1 hour TTL. Results are automatically cleaned up after 1 hour.
+- Q: Can any client poll any job ID, or should there be access control? → A: No access control — the UUID itself is unguessable and serves as the access token.
+- Q: Should the status endpoint include a polling hint? → A: Fixed `retry_after: 5` seconds in every "processing" response. Agent takes ~30s, so 5s intervals means ~6 polls instead of wasting requests.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 — Instant Chat Acknowledgment (Priority: P1)
@@ -56,24 +66,24 @@ External services (Gmail, WhatsApp) send webhook notifications to the system. Th
 
 ---
 
-### User Story 4 — Backward-Compatible Synchronous Mode (Priority: P3)
+### User Story 4 — Synchronous Developer Escape Hatch (Priority: P3)
 
-Some clients (simple scripts, testing tools, Swagger UI) prefer a single request-response flow. The system supports an optional synchronous mode where the caller can choose to wait for the full response in a single request, preserving the current behavior.
+Developers and testing tools (Swagger UI, curl scripts) sometimes need the old single request-response flow for debugging. The system supports an optional synchronous mode via `?sync=true` query parameter that waits for the full response, bypassing background processing.
 
-**Why this priority**: Nice-to-have for developer experience and testing. The async flow is the primary mode, but having a synchronous fallback simplifies debugging and manual testing.
+**Why this priority**: Nice-to-have for developer experience and testing. The async flow is the default for all clients, but having a synchronous escape hatch simplifies debugging and manual testing in Swagger.
 
-**Independent Test**: Send a POST to `/api/chat` with a synchronous flag, verify the response contains the full agent answer (not just a tracking ID), matching the current behavior.
+**Independent Test**: Send a POST to `/api/chat?sync=true`, verify the response contains the full agent answer (not just a tracking ID), matching the pre-feature behavior.
 
 **Acceptance Scenarios**:
 
-1. **Given** a client sends a chat request with the synchronous flag, **When** the agent completes, **Then** the full response is returned in the same HTTP response.
-2. **Given** a client sends a chat request without the synchronous flag (default), **When** the request is received, **Then** the system returns a tracking ID and processes in the background (default async behavior).
+1. **Given** a developer sends a chat request with `?sync=true`, **When** the agent completes, **Then** the full response is returned in the same HTTP response.
+2. **Given** a client sends a chat request without `?sync=true` (default), **When** the request is received, **Then** the system returns HTTP 202 with a tracking ID and processes in the background.
 
 ---
 
 ### Edge Cases
 
-- What happens when the background task crashes mid-processing? The job status should reflect "failed" with an error message, not remain stuck in "processing" forever.
+- What happens when the background task crashes mid-processing? Jobs stuck in "processing" for longer than 5 minutes are automatically considered "failed" when polled (timeout-based expiry). The status endpoint checks the job's creation timestamp and returns "failed" with a timeout error message.
 - What happens when the job result storage is unavailable? The system should still accept requests and attempt processing — results may be lost but the system should not crash.
 - What happens when a client polls for a job that was processed hours ago? Jobs should have a retention period after which they are cleaned up. Expired jobs return "not found".
 - What happens when many concurrent requests are submitted? The system should accept all of them without blocking and process them in the order received.
@@ -90,12 +100,13 @@ Some clients (simple scripts, testing tools, Swagger UI) prefer a single request
 - **FR-005**: System MUST mark jobs as "failed" with a user-friendly error message if the background task encounters an error.
 - **FR-006**: System MUST support three job statuses: "processing", "completed", and "failed".
 - **FR-007**: System MUST apply background processing to all three channels: web chat, Gmail webhook, and WhatsApp webhook.
-- **FR-008**: System MUST support an optional synchronous mode for the chat endpoint that preserves the current blocking behavior.
-- **FR-009**: System MUST clean up completed and failed job results after a retention period to prevent unbounded storage growth.
+- **FR-008**: System MUST default to async (background) processing for all chat and webhook endpoints. A `?sync=true` query parameter MUST be supported as a developer escape hatch that preserves the blocking behavior.
+- **FR-009**: System MUST clean up completed and failed job results after 1 hour to prevent unbounded storage growth.
 - **FR-010**: System MUST log the start, completion, and failure of every background job with the tracking identifier for observability.
 - **FR-011**: System MUST preserve the existing correlation ID mechanism — the tracking identifier should be the correlation ID already generated per request.
 - **FR-012**: System MUST handle concurrent background tasks without blocking each other.
 - **FR-013**: System MUST return appropriate HTTP status codes: 202 Accepted for async responses, 200 OK for synchronous responses, 404 Not Found for unknown job IDs.
+- **FR-014**: System MUST include a `retry_after: 5` field in every "processing" status response to guide client polling frequency.
 
 ### Key Entities
 
@@ -106,7 +117,7 @@ Some clients (simple scripts, testing tools, Swagger UI) prefer a single request
 ### Measurable Outcomes
 
 - **SC-001**: Chat and webhook endpoints return acknowledgment responses in under 2 seconds, compared to the current 30–40 seconds.
-- **SC-002**: 100% of submitted requests are processed to completion or marked as failed — no jobs remain stuck in "processing" state indefinitely.
+- **SC-002**: 100% of submitted requests are processed to completion or marked as failed — jobs stuck in "processing" beyond 5 minutes are automatically treated as "failed" when polled.
 - **SC-003**: All existing functionality (customer lookup, KB search, ticket creation, response delivery) continues to work identically when triggered from a background task.
 - **SC-004**: System can accept and queue 50+ concurrent chat requests without rejecting any, even while previous requests are still being processed.
 - **SC-005**: Job results are retrievable for at least 1 hour after completion, giving clients sufficient time to poll for results.
