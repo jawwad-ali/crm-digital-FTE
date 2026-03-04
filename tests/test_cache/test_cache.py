@@ -8,15 +8,20 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from agent.cache import (
+    JOB_TIMEOUT,
+    TTL_JOB,
     TTL_KB_SEARCH,
     _PREFIX,
     get_cached,
+    get_job,
     invalidate,
     invalidate_pattern,
     make_channel_config_key,
     make_customer_lookup_key,
+    make_job_key,
     make_kb_cache_key,
     set_cached,
+    set_job,
 )
 
 
@@ -221,3 +226,90 @@ class TestGracefulFailure:
         await mock_redis.aclose()
         await invalidate(mock_redis, "any:key")
         # No exception = success
+
+
+# ── Job store ──────────────────────────────────────────────────────────
+
+
+class TestMakeJobKey:
+    def test_format(self):
+        assert make_job_key("abc123") == "job:abc123"
+
+    def test_different_ids(self):
+        assert make_job_key("aaa") != make_job_key("bbb")
+
+
+class TestSetGetJob:
+    async def test_round_trip(self, mock_redis):
+        """set_job stores data; get_job retrieves it."""
+        await set_job(mock_redis, "job1", {"status": "processing"})
+        result = await get_job(mock_redis, "job1")
+        assert result is not None
+        assert result["status"] == "processing"
+
+    async def test_created_at_auto_injected(self, mock_redis):
+        """set_job auto-injects created_at if not present."""
+        await set_job(mock_redis, "job2", {"status": "processing"})
+        result = await get_job(mock_redis, "job2")
+        assert "created_at" in result
+
+    async def test_created_at_preserved(self, mock_redis):
+        """set_job preserves explicit created_at."""
+        await set_job(mock_redis, "job3", {"status": "completed", "created_at": "2026-01-01T00:00:00+00:00"})
+        result = await get_job(mock_redis, "job3")
+        assert result["created_at"] == "2026-01-01T00:00:00+00:00"
+
+    async def test_get_missing_key(self, mock_redis):
+        """get_job returns None for nonexistent job."""
+        result = await get_job(mock_redis, "nonexistent")
+        assert result is None
+
+    async def test_get_none_client(self):
+        """get_job returns None when redis_client is None."""
+        result = await get_job(None, "any-id")
+        assert result is None
+
+    async def test_set_none_client(self):
+        """set_job no-ops when redis_client is None."""
+        await set_job(None, "any-id", {"status": "processing"})
+        # No exception = success
+
+    async def test_ttl_applied(self, mock_redis):
+        """set_job applies TTL to the stored key."""
+        await set_job(mock_redis, "job-ttl", {"status": "processing"})
+        ttl = await mock_redis.ttl(f"{_PREFIX}job:job-ttl")
+        assert 0 < ttl <= TTL_JOB
+
+    async def test_timeout_detection(self, mock_redis):
+        """get_job returns failed status for jobs older than JOB_TIMEOUT."""
+        from datetime import datetime, timedelta, timezone
+
+        old_time = (datetime.now(timezone.utc) - timedelta(seconds=JOB_TIMEOUT + 60)).isoformat()
+        await set_job(mock_redis, "stale", {"status": "processing", "created_at": old_time})
+        result = await get_job(mock_redis, "stale")
+        assert result["status"] == "failed"
+        assert "timed out" in result["error"]
+
+    async def test_no_timeout_for_completed(self, mock_redis):
+        """get_job does NOT apply timeout to completed jobs."""
+        from datetime import datetime, timedelta, timezone
+
+        old_time = (datetime.now(timezone.utc) - timedelta(seconds=JOB_TIMEOUT + 60)).isoformat()
+        await set_job(mock_redis, "done", {"status": "completed", "response": "ok", "created_at": old_time})
+        result = await get_job(mock_redis, "done")
+        assert result["status"] == "completed"
+        assert result["response"] == "ok"
+
+    async def test_set_broken_client(self):
+        """set_job doesn't raise when Redis is broken."""
+        broken = AsyncMock()
+        broken.set = AsyncMock(side_effect=ConnectionError("Redis down"))
+        await set_job(broken, "any-id", {"status": "processing"})
+        # No exception = success
+
+    async def test_get_broken_client(self):
+        """get_job returns None when Redis is broken."""
+        broken = AsyncMock()
+        broken.get = AsyncMock(side_effect=ConnectionError("Redis down"))
+        result = await get_job(broken, "any-id")
+        assert result is None

@@ -39,6 +39,20 @@ class ChatResponse(BaseModel):
     correlation_id: str
 
 
+class JobAccepted(BaseModel):
+    job_id: str
+    status: str = "processing"
+    retry_after: int = 5
+
+
+class JobStatus(BaseModel):
+    job_id: str
+    status: str
+    response: str | None = None
+    error: str | None = None
+    retry_after: int | None = None
+
+
 class WebhookPayload(BaseModel):
     from_address: str
     body: str

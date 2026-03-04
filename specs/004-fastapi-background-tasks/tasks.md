@@ -17,11 +17,11 @@
 
 **Purpose**: Add Redis-based job storage functions that all endpoints will use. Must complete before any user story work.
 
-- [ ] T001 Add `TTL_JOB = 3600`, `JOB_TIMEOUT = 300` constants and `make_job_key(job_id)` helper returning `job:{job_id}` in `agent/cache.py`
-- [ ] T002 Add `set_job(redis_client, job_id, data, ttl=TTL_JOB)` function in `agent/cache.py` — serialize `data` dict as JSON, store with `crm:` prefix and TTL. Auto-inject `created_at` ISO timestamp if not present. Graceful no-op when `redis_client is None`.
-- [ ] T003 Add `get_job(redis_client, job_id)` function in `agent/cache.py` — fetch and deserialize job JSON. If `status == "processing"` and `created_at` is older than `JOB_TIMEOUT` seconds, return `{"status": "failed", "error": "Request timed out. Please try again.", "response": null}`. Return `None` for missing keys or `None` client.
-- [ ] T004 [P] Add `JobAccepted` and `JobStatus` Pydantic response models in `api/main.py` — `JobAccepted(job_id: str, status: str = "processing", retry_after: int = 5)`, `JobStatus(job_id: str, status: str, response: str | None = None, error: str | None = None, retry_after: int | None = None)`
-- [ ] T005 Add job store unit tests in `tests/test_cache/test_cache.py` — test `make_job_key` format, `set_job` + `get_job` round-trip, `get_job` returns `None` for missing key, `get_job` timeout detection (mock `created_at` to 6 minutes ago), `set_job`/`get_job` no-op with `None` client, `set_job` graceful failure with broken client
+- [x] T001 Add `TTL_JOB = 3600`, `JOB_TIMEOUT = 300` constants and `make_job_key(job_id)` helper returning `job:{job_id}` in `agent/cache.py`
+- [x] T002 Add `set_job(redis_client, job_id, data, ttl=TTL_JOB)` function in `agent/cache.py` — serialize `data` dict as JSON, store with `crm:` prefix and TTL. Auto-inject `created_at` ISO timestamp if not present. Graceful no-op when `redis_client is None`.
+- [x] T003 Add `get_job(redis_client, job_id)` function in `agent/cache.py` — fetch and deserialize job JSON. If `status == "processing"` and `created_at` is older than `JOB_TIMEOUT` seconds, return `{"status": "failed", "error": "Request timed out. Please try again.", "response": null}`. Return `None` for missing keys or `None` client.
+- [x] T004 [P] Add `JobAccepted` and `JobStatus` Pydantic response models in `api/main.py` — `JobAccepted(job_id: str, status: str = "processing", retry_after: int = 5)`, `JobStatus(job_id: str, status: str, response: str | None = None, error: str | None = None, retry_after: int | None = None)`
+- [x] T005 Add job store unit tests in `tests/test_cache/test_cache.py` — test `make_job_key` format, `set_job` + `get_job` round-trip, `get_job` returns `None` for missing key, `get_job` timeout detection (mock `created_at` to 6 minutes ago), `set_job`/`get_job` no-op with `None` client, `set_job` graceful failure with broken client
 
 **Checkpoint**: Job store helpers ready — all 3 functions tested, all user stories can now use `set_job`/`get_job`.
 
