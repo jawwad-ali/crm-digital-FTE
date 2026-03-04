@@ -268,8 +268,9 @@ class TestCustomerHistory:
 
 
 class TestGmailWebhook:
+    @patch("api.main.set_job", new_callable=AsyncMock)
     @patch("api.main.run_agent", new_callable=AsyncMock)
-    async def test_gmail_happy_path(self, mock_run, client: AsyncClient):
+    async def test_gmail_returns_202_with_job(self, mock_run, mock_set_job, client: AsyncClient):
         mock_run.return_value = "Got your email."
 
         resp = await client.post(
@@ -277,11 +278,13 @@ class TestGmailWebhook:
             json={"from_address": "user@gmail.com", "body": "Need help"},
         )
 
-        assert resp.status_code == 200
+        assert resp.status_code == 202
         data = resp.json()
-        assert data["response"] == "Got your email."
-        assert "correlation_id" in data
+        assert "job_id" in data
+        assert data["status"] == "processing"
+        assert data["retry_after"] == 5
 
+        mock_run.assert_called_once()
         call_args = mock_run.call_args
         assert "[Customer: user@gmail.com, Channel: gmail]" in call_args[0][1]
 
@@ -296,8 +299,9 @@ class TestGmailWebhook:
 
 
 class TestWhatsAppWebhook:
+    @patch("api.main.set_job", new_callable=AsyncMock)
     @patch("api.main.run_agent", new_callable=AsyncMock)
-    async def test_whatsapp_happy_path(self, mock_run, client: AsyncClient):
+    async def test_whatsapp_returns_202_with_job(self, mock_run, mock_set_job, client: AsyncClient):
         mock_run.return_value = "Got your WhatsApp message."
 
         resp = await client.post(
@@ -305,10 +309,12 @@ class TestWhatsAppWebhook:
             json={"from_address": "+15551234567", "body": "Hello"},
         )
 
-        assert resp.status_code == 200
+        assert resp.status_code == 202
         data = resp.json()
-        assert data["response"] == "Got your WhatsApp message."
+        assert "job_id" in data
+        assert data["status"] == "processing"
 
+        mock_run.assert_called_once()
         call_args = mock_run.call_args
         assert "[Customer: +15551234567, Channel: whatsapp]" in call_args[0][1]
 

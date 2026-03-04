@@ -128,6 +128,24 @@ async def _process_chat(job_id: str, message: str, ctx) -> None:
         })
 
 
+async def _process_webhook(job_id: str, channel: str, from_address: str, body: str, ctx) -> None:
+    """Run the agent in the background for a webhook request."""
+    set_correlation_id(job_id)
+    logger.info("Job %s started — %s webhook processing", job_id, channel)
+    try:
+        message = f"[Customer: {from_address}, Channel: {channel}] {body}"
+        response = await run_agent(ctx, message)
+        await set_job(ctx.redis_client, job_id, {"status": "completed", "response": response})
+        logger.info("Job %s completed — %s response stored", job_id, channel)
+    except Exception as exc:
+        logger.exception("Job %s failed — %s — %s", job_id, channel, exc)
+        await set_job(ctx.redis_client, job_id, {
+            "status": "failed",
+            "response": None,
+            "error": "An error occurred while processing your request. Please try again.",
+        })
+
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
@@ -196,23 +214,25 @@ async def customer_history(customer_id: str, request: Request):
     return data
 
 
-@app.post("/api/webhooks/gmail", response_model=ChatResponse)
-async def webhook_gmail(payload: WebhookPayload, request: Request):
+@app.post("/api/webhooks/gmail", status_code=202, response_model=JobAccepted)
+async def webhook_gmail(payload: WebhookPayload, request: Request, background_tasks: BackgroundTasks):
     cid = set_correlation_id()
     logger.info("Gmail webhook — from=%s", payload.from_address)
 
-    message = f"[Customer: {payload.from_address}, Channel: gmail] {payload.body}"
-    response = await run_agent(request.app.state.agent_ctx, message)
+    ctx = request.app.state.agent_ctx
+    await set_job(ctx.redis_client, cid, {"status": "processing"})
+    background_tasks.add_task(_process_webhook, cid, "gmail", payload.from_address, payload.body, ctx)
 
-    return ChatResponse(response=response, correlation_id=cid)
+    return JobAccepted(job_id=cid)
 
 
-@app.post("/api/webhooks/whatsapp", response_model=ChatResponse)
-async def webhook_whatsapp(payload: WebhookPayload, request: Request):
+@app.post("/api/webhooks/whatsapp", status_code=202, response_model=JobAccepted)
+async def webhook_whatsapp(payload: WebhookPayload, request: Request, background_tasks: BackgroundTasks):
     cid = set_correlation_id()
     logger.info("WhatsApp webhook — from=%s", payload.from_address)
 
-    message = f"[Customer: {payload.from_address}, Channel: whatsapp] {payload.body}"
-    response = await run_agent(request.app.state.agent_ctx, message)
+    ctx = request.app.state.agent_ctx
+    await set_job(ctx.redis_client, cid, {"status": "processing"})
+    background_tasks.add_task(_process_webhook, cid, "whatsapp", payload.from_address, payload.body, ctx)
 
-    return ChatResponse(response=response, correlation_id=cid)
+    return JobAccepted(job_id=cid)

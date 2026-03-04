@@ -53,10 +53,10 @@
 
 ### Implementation
 
-- [ ] T011 [US3] Create `_process_webhook(job_id, channel, from_address, body, ctx)` async background task function in `api/main.py` — same pattern as `_process_chat`: set correlation ID, run agent, set job result. Log start and completion/failure with channel name.
-- [ ] T012 [US3] Refactor `POST /api/webhooks/gmail` endpoint in `api/main.py` — inject `BackgroundTasks`, generate correlation ID, store "processing" job, dispatch `_process_webhook(channel="gmail")`, return `JobAccepted` with HTTP 202.
-- [ ] T013 [US3] Refactor `POST /api/webhooks/whatsapp` endpoint in `api/main.py` — same pattern as T012 with `channel="whatsapp"`.
-- [ ] T014 [US3] Update existing `TestGmailWebhook` and `TestWhatsAppWebhook` tests in `tests/test_api/test_main.py` — change expected status from 200 to 202, update response shape to `JobAccepted`. Validation error tests (missing fields) should still return 422.
+- [x] T011 [US3] Create `_process_webhook(job_id, channel, from_address, body, ctx)` async background task function in `api/main.py` — same pattern as `_process_chat`: set correlation ID, run agent, set job result. Log start and completion/failure with channel name.
+- [x] T012 [US3] Refactor `POST /api/webhooks/gmail` endpoint in `api/main.py` — inject `BackgroundTasks`, generate correlation ID, store "processing" job, dispatch `_process_webhook(channel="gmail")`, return `JobAccepted` with HTTP 202.
+- [x] T013 [US3] Refactor `POST /api/webhooks/whatsapp` endpoint in `api/main.py` — same pattern as T012 with `channel="whatsapp"`.
+- [x] T014 [US3] Update existing `TestGmailWebhook` and `TestWhatsAppWebhook` tests in `tests/test_api/test_main.py` — change expected status from 200 to 202, update response shape to `JobAccepted`. Validation error tests (missing fields) should still return 422.
 
 **Checkpoint**: All 3 channels (web, Gmail, WhatsApp) return instantly. Background processing works identically across channels.
 
