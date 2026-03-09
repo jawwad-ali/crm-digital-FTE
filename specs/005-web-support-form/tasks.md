@@ -77,12 +77,12 @@
 
 ### Implementation
 
-- [ ] T022 [P] [US2] Create `CustomerHeader` component in `web/src/components/CustomerHeader.tsx` — compact bar showing customer name and email (e.g., "Ali (ali@test.com)"). Visible only in follow-up mode (FR-017).
-- [ ] T023 [US2] Add follow-up mode to `SupportForm` in `web/src/components/SupportForm.tsx` — after first response received, set `isFollowUpMode = true`. Conditionally render `CustomerHeader` + `MessageInput` instead of `InitialForm`. Follow-up submits reuse stored name/email from conversation state.
+- [x] T022 [P] [US2] Create `CustomerHeader` component in `web/src/components/CustomerHeader.tsx` — compact bar showing customer name and email (e.g., "Ali (ali@test.com)"). Visible only in follow-up mode (FR-017).
+- [x] T023 [US2] Add follow-up mode to `SupportForm` in `web/src/components/SupportForm.tsx` — after first response received, set `isFollowUpMode = true`. Conditionally render `CustomerHeader` + `MessageInput` instead of `InitialForm`. Follow-up submits reuse stored name/email from conversation state.
 
 ### Tests
 
-- [ ] T024 [US2] Write tests for follow-up mode in `web/src/__tests__/integration/test-followup-flow.test.tsx` — verify: after first response, InitialForm hidden, CustomerHeader visible, message-only input shown. Submit follow-up, verify both exchanges in thread. Multiple follow-ups maintain full history.
+- [x] T024 [US2] Write tests for follow-up mode in `web/src/__tests__/integration/test-followup-flow.test.tsx` — verify: after first response, InitialForm hidden, CustomerHeader visible, message-only input shown. Submit follow-up, verify both exchanges in thread. Multiple follow-ups maintain full history.
 
 **Checkpoint**: Multi-turn conversation works. Name/email collapse after first response. `npm test` passes US2 tests.
 

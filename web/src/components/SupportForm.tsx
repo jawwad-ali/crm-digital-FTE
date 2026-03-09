@@ -8,6 +8,8 @@ import { useCooldown } from "@/hooks/useCooldown";
 import { submitChat } from "@/lib/api";
 import { InitialForm } from "./InitialForm";
 import { ChatThread } from "./ChatThread";
+import { CustomerHeader } from "./CustomerHeader";
+import { MessageInput } from "./MessageInput";
 import { StatusIndicator } from "./StatusIndicator";
 
 export function SupportForm() {
@@ -104,6 +106,17 @@ export function SupportForm() {
     [handleSubmit],
   );
 
+  const handleFollowUpSubmit = useCallback(
+    (message: string) => {
+      handleSubmit(
+        conversation.customerName,
+        conversation.customerEmail,
+        message,
+      );
+    },
+    [handleSubmit, conversation.customerName, conversation.customerEmail],
+  );
+
   const isProcessing = isSubmitting || isPolling;
 
   return (
@@ -115,9 +128,21 @@ export function SupportForm() {
         onRetry={error ? () => setError(null) : undefined}
       />
 
+      {conversation.isFollowUpMode && (
+        <CustomerHeader
+          name={conversation.customerName}
+          email={conversation.customerEmail}
+        />
+      )}
+
       <ChatThread messages={conversation.messages} />
 
-      {!conversation.isFollowUpMode && (
+      {conversation.isFollowUpMode ? (
+        <MessageInput
+          onSubmit={handleFollowUpSubmit}
+          disabled={isProcessing || isCoolingDown}
+        />
+      ) : (
         <InitialForm
           onSubmit={handleInitialSubmit}
           isSubmitting={isProcessing || isCoolingDown}
