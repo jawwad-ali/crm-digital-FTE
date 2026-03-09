@@ -69,10 +69,15 @@ def agent_context(mock_pool, mock_openai):
 
 @pytest.fixture
 def tool_ctx(agent_context):
-    """RunContextWrapper suitable for on_invoke_tool calls."""
-    from agents import RunContextWrapper
+    """ToolContext suitable for on_invoke_tool calls."""
+    from agents.tool_context import ToolContext
 
-    return RunContextWrapper(context=agent_context)
+    return ToolContext(
+        context=agent_context,
+        tool_name="test_tool",
+        tool_call_id="call_test",
+        tool_arguments="{}",
+    )
 
 
 @pytest.fixture
@@ -105,7 +110,12 @@ def agent_context_with_cache(mock_pool, mock_openai, mock_redis):
 
 @pytest.fixture
 def tool_ctx_with_cache(agent_context_with_cache):
-    """RunContextWrapper with cache-enabled AgentContext."""
-    from agents import RunContextWrapper
+    """ToolContext with cache-enabled AgentContext."""
+    from agents.tool_context import ToolContext
 
-    return RunContextWrapper(context=agent_context_with_cache)
+    return ToolContext(
+        context=agent_context_with_cache,
+        tool_name="test_tool",
+        tool_call_id="call_test",
+        tool_arguments="{}",
+    )
