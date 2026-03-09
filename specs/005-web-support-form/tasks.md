@@ -18,12 +18,12 @@
 
 **Purpose**: Create the Next.js 15 project with all tooling configured
 
-- [ ] T001 Initialize Next.js 15 project in `web/` — run `npx create-next-app@latest web` with TypeScript, Tailwind CSS, App Router, src/ directory. Verify `npm run dev` starts on port 3000.
-- [ ] T002 Configure Tailwind CSS v4 — ensure `web/src/app/globals.css` uses `@import "tailwindcss"`, `web/postcss.config.mjs` uses `@tailwindcss/postcss` plugin. Remove any v3-style `tailwind.config.ts` if generated.
-- [ ] T003 Configure Vitest + React Testing Library — create `web/vitest.config.ts` with jsdom environment and path aliases matching tsconfig. Install `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`, `jsdom`. Add `test` and `test:watch` scripts to `web/package.json`.
-- [ ] T004 [P] Create TypeScript interfaces in `web/src/lib/types.ts` — define `Message`, `Conversation`, `ChatRequest`, `JobAccepted`, `JobStatus`, `ChatResponse`, `HealthStatus`, `ValidationErrors` per data-model.md.
-- [ ] T005 [P] Create API client in `web/src/lib/api.ts` — implement `submitChat()`, `getJobStatus()`, `checkHealth()` functions using `fetch()` with `NEXT_PUBLIC_API_URL` base URL per contracts/api-integration.md.
-- [ ] T006 [P] Create `.env.example` in `web/` with `NEXT_PUBLIC_API_URL=http://localhost:8000` and copy to `.env.local`.
+- [x] T001 Initialize Next.js 15 project in `web/` — run `npx create-next-app@latest web` with TypeScript, Tailwind CSS, App Router, src/ directory. Verify `npm run dev` starts on port 3000.
+- [x] T002 Configure Tailwind CSS v4 — ensure `web/src/app/globals.css` uses `@import "tailwindcss"`, `web/postcss.config.mjs` uses `@tailwindcss/postcss` plugin. Remove any v3-style `tailwind.config.ts` if generated.
+- [x] T003 Configure Vitest + React Testing Library — create `web/vitest.config.ts` with jsdom environment and path aliases matching tsconfig. Install `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`, `jsdom`. Add `test` and `test:watch` scripts to `web/package.json`.
+- [x] T004 [P] Create TypeScript interfaces in `web/src/lib/types.ts` — define `Message`, `Conversation`, `ChatRequest`, `JobAccepted`, `JobStatus`, `ChatResponse`, `HealthStatus`, `ValidationErrors` per data-model.md.
+- [x] T005 [P] Create API client in `web/src/lib/api.ts` — implement `submitChat()`, `getJobStatus()`, `checkHealth()` functions using `fetch()` with `NEXT_PUBLIC_API_URL` base URL per contracts/api-integration.md.
+- [x] T006 [P] Create `.env.example` in `web/` with `NEXT_PUBLIC_API_URL=http://localhost:8000` and copy to `.env.local`.
 
 **Checkpoint**: `npm run dev` serves an empty page at localhost:3000, `npm test` runs (0 tests), API client and types are ready.
 

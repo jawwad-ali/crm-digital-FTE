@@ -27,3 +27,10 @@ Thumbs.db
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Node.js / Next.js
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
