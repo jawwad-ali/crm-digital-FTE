@@ -7,7 +7,7 @@ Thank you for your interest in contributing! This guide will help you get set up
 ### Prerequisites
 
 - Python 3.12+
-- Node.js 18+
+- Node.js 20+
 - PostgreSQL 16+ with [pgvector](https://github.com/pgvector/pgvector)
 - Redis 7+
 - [uv](https://docs.astral.sh/uv/) (Python package manager)

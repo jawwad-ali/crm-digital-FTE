@@ -126,7 +126,7 @@ The system processes requests **asynchronously** via background tasks with Redis
 ### Prerequisites
 
 - Python 3.12+
-- Node.js 18+
+- Node.js 20+
 - PostgreSQL 16+ with [pgvector extension](https://github.com/pgvector/pgvector)
 - Redis 7+
 - [uv](https://docs.astral.sh/uv/) (Python package manager)
