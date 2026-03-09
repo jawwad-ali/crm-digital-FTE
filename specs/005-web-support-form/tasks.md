@@ -96,13 +96,13 @@
 
 ### Implementation
 
-- [ ] T025 [US3] Enhance `InitialForm` validation in `web/src/components/InitialForm.tsx` — add email format validation (regex), 2000 character limit on message, inline error messages below each field, character counter turns red when approaching/exceeding limit (FR-002).
-- [ ] T026 [US3] Add error recovery to `SupportForm` in `web/src/components/SupportForm.tsx` — handle network errors (fetch throws), server errors (non-2xx status), timeout (polling > 5 min), expired jobs (404 from polling). Display error via `StatusIndicator` with "Try Again" button. Retry preserves entered data (FR-012, FR-013).
-- [ ] T027 [US3] Add 10-second cooldown throttle in `web/src/components/SupportForm.tsx` — after each successful submission, call `startCooldown()`. Submit button disabled during cooldown with visual countdown or "Please wait" label (FR-016).
+- [x] T025 [US3] Enhance `InitialForm` validation in `web/src/components/InitialForm.tsx` — add email format validation (regex), 2000 character limit on message, inline error messages below each field, character counter turns red when approaching/exceeding limit (FR-002).
+- [x] T026 [US3] Add error recovery to `SupportForm` in `web/src/components/SupportForm.tsx` — handle network errors (fetch throws), server errors (non-2xx status), timeout (polling > 5 min), expired jobs (404 from polling). Display error via `StatusIndicator` with "Try Again" button. Retry preserves entered data (FR-012, FR-013).
+- [x] T027 [US3] Add 10-second cooldown throttle in `web/src/components/SupportForm.tsx` — after each successful submission, call `startCooldown()`. Submit button disabled during cooldown with visual countdown or "Please wait" label (FR-016).
 
 ### Tests
 
-- [ ] T028 [US3] Write validation tests in `web/src/__tests__/components/test-validation.test.tsx` — empty fields show errors, invalid email format shows error, 2001-char message shows error, valid data passes. Write error recovery tests in `web/src/__tests__/integration/test-error-recovery.test.tsx` — network error shows banner with retry, timeout after 5 min shows message, retry preserves data, cooldown disables button for 10 seconds.
+- [x] T028 [US3] Write validation tests in `web/src/__tests__/components/test-validation.test.tsx` — empty fields show errors, invalid email format shows error, 2001-char message shows error, valid data passes. Write error recovery tests in `web/src/__tests__/integration/test-error-recovery.test.tsx` — network error shows banner with retry, timeout after 5 min shows message, retry preserves data, cooldown disables button for 10 seconds.
 
 **Checkpoint**: All validation and error paths covered. `npm test` passes US3 tests.
 

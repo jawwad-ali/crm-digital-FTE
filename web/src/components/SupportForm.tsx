@@ -20,12 +20,17 @@ export function SupportForm() {
     setCustomerInfo,
   } = useConversation();
   const { isHealthy } = useHealthCheck();
-  const { isCoolingDown } = useCooldown();
+  const { isCoolingDown, startCooldown } = useCooldown();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
+  const [lastSubmission, setLastSubmission] = useState<{
+    name: string;
+    email: string;
+    message: string;
+  } | null>(null);
 
   const handlePollComplete = useCallback(
     (response: string) => {
@@ -36,8 +41,10 @@ export function SupportForm() {
       setActiveMessageId(null);
       setIsSubmitting(false);
       setError(null);
+      setLastSubmission(null);
+      startCooldown();
     },
-    [activeMessageId, updateMessageStatus],
+    [activeMessageId, updateMessageStatus, startCooldown],
   );
 
   const handlePollError = useCallback(
@@ -63,6 +70,7 @@ export function SupportForm() {
     async (name: string, email: string, messageText: string) => {
       setIsSubmitting(true);
       setError(null);
+      setLastSubmission({ name, email, message: messageText });
 
       // Store customer info on first submission
       if (!conversation.isFollowUpMode) {
@@ -117,6 +125,17 @@ export function SupportForm() {
     [handleSubmit, conversation.customerName, conversation.customerEmail],
   );
 
+  const handleRetry = useCallback(() => {
+    setError(null);
+    if (lastSubmission) {
+      handleSubmit(
+        lastSubmission.name,
+        lastSubmission.email,
+        lastSubmission.message,
+      );
+    }
+  }, [lastSubmission, handleSubmit]);
+
   const isProcessing = isSubmitting || isPolling;
 
   return (
@@ -125,7 +144,7 @@ export function SupportForm() {
         isHealthy={isHealthy}
         isProcessing={isProcessing}
         error={error}
-        onRetry={error ? () => setError(null) : undefined}
+        onRetry={error ? handleRetry : undefined}
       />
 
       {conversation.isFollowUpMode && (
@@ -145,7 +164,8 @@ export function SupportForm() {
       ) : (
         <InitialForm
           onSubmit={handleInitialSubmit}
-          isSubmitting={isProcessing || isCoolingDown}
+          isSubmitting={isProcessing}
+          isCoolingDown={isCoolingDown}
         />
       )}
     </div>

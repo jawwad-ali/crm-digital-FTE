@@ -6,12 +6,13 @@ import type { ValidationErrors } from "@/lib/types";
 interface InitialFormProps {
   onSubmit: (name: string, email: string, message: string) => void;
   isSubmitting: boolean;
+  isCoolingDown?: boolean;
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_MESSAGE_LENGTH = 2000;
 
-export function InitialForm({ onSubmit, isSubmitting }: InitialFormProps) {
+export function InitialForm({ onSubmit, isSubmitting, isCoolingDown = false }: InitialFormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -46,6 +47,7 @@ export function InitialForm({ onSubmit, isSubmitting }: InitialFormProps) {
 
   const charCount = message.length;
   const isOverLimit = charCount > MAX_MESSAGE_LENGTH;
+  const isApproachingLimit = charCount >= MAX_MESSAGE_LENGTH * 0.9 && !isOverLimit;
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
@@ -120,7 +122,13 @@ export function InitialForm({ onSubmit, isSubmitting }: InitialFormProps) {
             <span />
           )}
           <span
-            className={`text-xs ${isOverLimit ? "font-medium text-red-600" : "text-gray-400"}`}
+            className={`text-xs ${
+              isOverLimit
+                ? "font-medium text-red-600"
+                : isApproachingLimit
+                  ? "font-medium text-amber-600"
+                  : "text-gray-400"
+            }`}
           >
             {charCount} / {MAX_MESSAGE_LENGTH}
           </span>
@@ -130,10 +138,10 @@ export function InitialForm({ onSubmit, isSubmitting }: InitialFormProps) {
       {/* Submit button */}
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || isCoolingDown}
         className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300"
       >
-        {isSubmitting ? "Sending..." : "Send Message"}
+        {isCoolingDown ? "Please wait..." : isSubmitting ? "Sending..." : "Send Message"}
       </button>
     </form>
   );

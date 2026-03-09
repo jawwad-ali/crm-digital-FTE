@@ -29,6 +29,11 @@ async function submitInitialMessage(user: ReturnType<typeof userEvent.setup>) {
   await waitFor(() => {
     expect(screen.getByText("Agent reply 1")).toBeInTheDocument();
   });
+
+  // Wait for cooldown to expire (10 seconds after successful submission)
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(10000);
+  });
 }
 
 describe("Follow-up flow", () => {
