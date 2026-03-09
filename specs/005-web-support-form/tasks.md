@@ -62,8 +62,8 @@
 
 ### Tests
 
-- [ ] T020 [US1] Write component tests in `web/src/__tests__/components/` — test `InitialForm` (renders fields, submit callback), `ChatMessage` (customer vs agent display, markdown rendering), `ChatThread` (renders messages), `MessageInput` (char counter, submit on Enter), `StatusIndicator` (health states), `MarkdownRenderer` (renders bold, lists, links).
-- [ ] T021 [US1] Write integration test in `web/src/__tests__/integration/test-submit-flow.test.tsx` — render `SupportForm`, fill form, submit, mock `fetch` for POST /api/chat (202) then GET /api/jobs (processing → completed). Verify: processing indicator appears, agent response displays in chat thread.
+- [x] T020 [US1] Write component tests in `web/src/__tests__/components/` — test `InitialForm` (renders fields, submit callback), `ChatMessage` (customer vs agent display, markdown rendering), `ChatThread` (renders messages), `MessageInput` (char counter, submit on Enter), `StatusIndicator` (health states), `MarkdownRenderer` (renders bold, lists, links).
+- [x] T021 [US1] Write integration test in `web/src/__tests__/integration/test-submit-flow.test.tsx` — render `SupportForm`, fill form, submit, mock `fetch` for POST /api/chat (202) then GET /api/jobs (processing → completed). Verify: processing indicator appears, agent response displays in chat thread.
 
 **Checkpoint**: Form loads at localhost:3000, customer can submit message and see agent response. `npm test` passes US1 tests. This is the MVP.
 
