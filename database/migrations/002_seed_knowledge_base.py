@@ -224,6 +224,25 @@ ARTICLES: list[dict[str, str]] = [
         ),
     },
     {
+        "title": "How to Enable Two-Factor Authentication (2FA)",
+        "category": "account-management",
+        "content": (
+            "Two-factor authentication (2FA) adds an extra layer of security "
+            "to your account. To enable it, go to Settings > Account > Security "
+            "and click 'Enable 2FA'. You will be asked to scan a QR code with "
+            "an authenticator app such as Google Authenticator, Authy, or "
+            "Microsoft Authenticator. After scanning, enter the 6-digit code "
+            "from the app to confirm setup. Once enabled, you will need to "
+            "enter a code from your authenticator app each time you log in. "
+            "Backup codes are generated during setup — store them in a safe "
+            "place in case you lose access to your authenticator app. To "
+            "disable 2FA, go to the same Security settings page and click "
+            "'Disable 2FA'. You will need to enter a current authenticator "
+            "code to confirm. 2FA is mandatory for Enterprise plan accounts "
+            "and optional for Free and Pro plans."
+        ),
+    },
+    {
         "title": "How to Delete Your Account",
         "category": "account-management",
         "content": (

@@ -12,7 +12,7 @@ from agent.context import AgentContext
 
 logger = logging.getLogger(__name__)
 
-_SIMILARITY_THRESHOLD = 0.4
+_SIMILARITY_THRESHOLD = 0.25
 _EMBEDDING_MODEL = "text-embedding-3-small"
 
 
@@ -58,6 +58,8 @@ async def search_knowledge_base(
     vec_literal = "'[" + ",".join(str(float(v)) for v in query_embedding) + "]'"
     try:
         async with pool.acquire() as conn:
+            # Search ALL IVFFlat lists — default nprobe=1 misses most articles
+            await conn.execute("SET LOCAL ivfflat.probes = 10")
             rows = await conn.fetch(
                 f"SELECT id, title, content, category, "
                 f"  1 - (embedding <=> {vec_literal}::vector) AS similarity "

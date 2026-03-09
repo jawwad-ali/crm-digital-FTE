@@ -19,7 +19,7 @@ from agent.tools.knowledge import (
 
 
 def test_similarity_threshold():
-    assert _SIMILARITY_THRESHOLD == 0.4
+    assert _SIMILARITY_THRESHOLD == 0.25
 
 
 def test_embedding_model():
