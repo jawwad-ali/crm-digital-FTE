@@ -33,11 +33,11 @@
 
 **Purpose**: Custom hooks that all user stories depend on. MUST complete before any user story.
 
-- [ ] T007 [P] Implement `useConversation` hook in `web/src/hooks/useConversation.ts` — manages `Conversation` state with `addCustomerMessage()`, `updateMessageStatus()`, `setCustomerInfo()` per component-contracts.md.
-- [ ] T008 [P] Implement `useJobPolling` hook in `web/src/hooks/useJobPolling.ts` — accepts `jobId`, `onComplete`, `onError` callbacks. Uses `setTimeout` chain with `retry_after` interval. Stops on completed/failed. Timeout at 5 minutes. Network retry up to 3 failures per polling-flow in research.md.
-- [ ] T009 [P] Implement `useHealthCheck` hook in `web/src/hooks/useHealthCheck.ts` — calls `GET /health` once on mount, returns `{ isHealthy: boolean | null }`.
-- [ ] T010 [P] Implement `useCooldown` hook in `web/src/hooks/useCooldown.ts` — `startCooldown()` sets `isCoolingDown` to true for configurable duration (default 10000ms).
-- [ ] T011 Write hook tests in `web/src/__tests__/hooks/` — test `useConversation` (add message, update status, set customer info), `useJobPolling` (polling lifecycle, timeout, network retry), `useHealthCheck` (healthy/unhealthy), `useCooldown` (timer behavior). Use `renderHook` from RTL, mock `fetch` with `vi.fn()`.
+- [x] T007 [P] Implement `useConversation` hook in `web/src/hooks/useConversation.ts` — manages `Conversation` state with `addCustomerMessage()`, `updateMessageStatus()`, `setCustomerInfo()` per component-contracts.md.
+- [x] T008 [P] Implement `useJobPolling` hook in `web/src/hooks/useJobPolling.ts` — accepts `jobId`, `onComplete`, `onError` callbacks. Uses `setTimeout` chain with `retry_after` interval. Stops on completed/failed. Timeout at 5 minutes. Network retry up to 3 failures per polling-flow in research.md.
+- [x] T009 [P] Implement `useHealthCheck` hook in `web/src/hooks/useHealthCheck.ts` — calls `GET /health` once on mount, returns `{ isHealthy: boolean | null }`.
+- [x] T010 [P] Implement `useCooldown` hook in `web/src/hooks/useCooldown.ts` — `startCooldown()` sets `isCoolingDown` to true for configurable duration (default 10000ms).
+- [x] T011 Write hook tests in `web/src/__tests__/hooks/` — test `useConversation` (add message, update status, set customer info), `useJobPolling` (polling lifecycle, timeout, network retry), `useHealthCheck` (healthy/unhealthy), `useCooldown` (timer behavior). Use `renderHook` from RTL, mock `fetch` with `vi.fn()`.
 
 **Checkpoint**: All 4 hooks implemented and tested. `npm test` passes hook tests.
 
