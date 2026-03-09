@@ -56,14 +56,14 @@ export function StatusIndicator({
       {/* Error banner */}
       {error && (
         <div
-          className="flex items-center justify-between rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 rounded-md border border-red-200 bg-red-50 px-3 py-2.5 sm:px-4 sm:py-3 text-sm text-red-700"
           role="alert"
         >
           <span>{error}</span>
           {onRetry && (
             <button
               onClick={onRetry}
-              className="ml-4 font-medium text-red-700 underline hover:text-red-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+              className="min-h-[44px] flex items-center sm:ml-4 font-medium text-red-700 underline hover:text-red-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
             >
               Try Again
             </button>

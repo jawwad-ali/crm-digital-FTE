@@ -116,12 +116,12 @@
 
 ### Implementation
 
-- [ ] T029 [US4] Add responsive Tailwind classes to all components — mobile-first single-column layout (< 640px) with touch-friendly sizing (`min-h-[44px]` for inputs), tablet/desktop breakpoints (`sm:`, `md:`, `lg:`). Ensure no horizontal scroll at 320px. Update: `InitialForm`, `ChatThread`, `ChatMessage`, `MessageInput`, `CustomerHeader`, `SupportForm`, `StatusIndicator`.
-- [ ] T030 [US4] Add WCAG 2.1 AA accessibility to all components — proper `<label>` elements linked to inputs via `htmlFor`, `aria-describedby` for error messages, `aria-live="polite"` on ChatThread and StatusIndicator for screen readers, `aria-busy` during processing, visible focus rings (`focus-visible:ring-2`), sufficient color contrast (4.5:1 for text), keyboard navigation (Tab order, Enter to submit) (FR-008).
+- [x] T029 [US4] Add responsive Tailwind classes to all components — mobile-first single-column layout (< 640px) with touch-friendly sizing (`min-h-[44px]` for inputs), tablet/desktop breakpoints (`sm:`, `md:`, `lg:`). Ensure no horizontal scroll at 320px. Update: `InitialForm`, `ChatThread`, `ChatMessage`, `MessageInput`, `CustomerHeader`, `SupportForm`, `StatusIndicator`.
+- [x] T030 [US4] Add WCAG 2.1 AA accessibility to all components — proper `<label>` elements linked to inputs via `htmlFor`, `aria-describedby` for error messages, `aria-live="polite"` on ChatThread and StatusIndicator for screen readers, `aria-busy` during processing, visible focus rings (`focus-visible:ring-2`), sufficient color contrast (4.5:1 for text), keyboard navigation (Tab order, Enter to submit) (FR-008).
 
 ### Tests
 
-- [ ] T031 [US4] Write accessibility tests in `web/src/__tests__/accessibility/test-a11y.test.tsx` — run axe-core audit on rendered `SupportForm` (initial state, follow-up mode, error state). Verify zero WCAG 2.1 AA violations. Test keyboard navigation: Tab through fields, Enter to submit, focus moves to response after completion.
+- [x] T031 [US4] Write accessibility tests in `web/src/__tests__/accessibility/test-a11y.test.tsx` — run axe-core audit on rendered `SupportForm` (initial state, follow-up mode, error state). Verify zero WCAG 2.1 AA violations. Test keyboard navigation: Tab through fields, Enter to submit, focus moves to response after completion.
 
 **Checkpoint**: Responsive on all viewports. Keyboard navigable. Screen reader friendly. Axe audit passes. `npm test` passes US4 tests.
 
@@ -135,12 +135,12 @@
 
 ### Implementation
 
-- [ ] T032 [US5] Create embed page in `web/src/app/embed/page.tsx` — server component that renders `<SupportForm />` without the main page layout (no header, title, or surrounding chrome). Minimal padding for iframe context.
-- [ ] T033 [US5] Create embed example in `web/public/embed-example.html` — standalone HTML page with `<iframe src="http://localhost:3000/embed" width="400" height="600" style="border:none" />` demonstrating the embed integration.
+- [x] T032 [US5] Create embed page in `web/src/app/embed/page.tsx` — server component that renders `<SupportForm />` without the main page layout (no header, title, or surrounding chrome). Minimal padding for iframe context.
+- [x] T033 [US5] Create embed example in `web/public/embed-example.html` — standalone HTML page with `<iframe src="http://localhost:3000/embed" width="400" height="600" style="border:none" />` demonstrating the embed integration.
 
 ### Tests
 
-- [ ] T034 [US5] Write embed test in `web/src/__tests__/integration/test-embed.test.tsx` — render the embed page component, verify `SupportForm` is present, verify no page header/footer/nav elements rendered.
+- [x] T034 [US5] Write embed test in `web/src/__tests__/integration/test-embed.test.tsx` — render the embed page component, verify `SupportForm` is present, verify no page header/footer/nav elements rendered.
 
 **Checkpoint**: Embed page works at localhost:3000/embed. Example HTML loads form in iframe. `npm test` passes US5 tests.
 
@@ -150,9 +150,9 @@
 
 **Purpose**: Final validation, cleanup, and documentation
 
-- [ ] T035 Run full test suite (`npm test`) — all component, hook, integration, and accessibility tests pass
-- [ ] T036 Run quickstart.md validation — execute all 7 manual testing scenarios from quickstart.md against running backend + frontend
-- [ ] T037 Final code review and cleanup — remove any unused imports, ensure consistent code style, verify all components have proper TypeScript types, no `any` types
+- [x] T035 Run full test suite (`npm test`) — all component, hook, integration, and accessibility tests pass
+- [x] T036 Run quickstart.md validation — execute all 7 manual testing scenarios from quickstart.md against running backend + frontend
+- [x] T037 Final code review and cleanup — remove any unused imports, ensure consistent code style, verify all components have proper TypeScript types, no `any` types
 
 ---
 

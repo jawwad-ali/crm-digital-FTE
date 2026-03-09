@@ -46,7 +46,7 @@ export function MessageInput({
         placeholder="Type your message..."
         aria-label="Support message"
         rows={3}
-        className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100"
+        className="min-h-[44px] w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-base sm:text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-100"
       />
       <div className="flex items-center justify-between">
         <span
@@ -59,7 +59,7 @@ export function MessageInput({
         <button
           onClick={handleSubmit}
           disabled={!canSubmit}
-          className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300"
+          className="min-h-[44px] rounded-lg bg-blue-600 px-5 py-2 text-base sm:text-sm font-medium text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300"
         >
           Send
         </button>

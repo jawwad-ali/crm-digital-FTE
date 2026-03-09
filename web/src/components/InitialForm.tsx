@@ -64,7 +64,7 @@ export function InitialForm({ onSubmit, isSubmitting, isCoolingDown = false }: I
           disabled={isSubmitting}
           aria-describedby={errors.name ? "name-error" : undefined}
           aria-invalid={!!errors.name}
-          className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100"
+          className="min-h-[44px] rounded-lg border border-gray-300 px-4 py-2.5 text-base sm:text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-100"
           placeholder="Your name"
         />
         {errors.name && (
@@ -87,7 +87,7 @@ export function InitialForm({ onSubmit, isSubmitting, isCoolingDown = false }: I
           disabled={isSubmitting}
           aria-describedby={errors.email ? "email-error" : undefined}
           aria-invalid={!!errors.email}
-          className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100"
+          className="min-h-[44px] rounded-lg border border-gray-300 px-4 py-2.5 text-base sm:text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-100"
           placeholder="you@example.com"
         />
         {errors.email && (
@@ -110,7 +110,7 @@ export function InitialForm({ onSubmit, isSubmitting, isCoolingDown = false }: I
           rows={4}
           aria-describedby={errors.message ? "message-error" : undefined}
           aria-invalid={!!errors.message}
-          className="w-full resize-none rounded-lg border border-gray-300 px-4 py-2.5 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100"
+          className="min-h-[44px] w-full resize-none rounded-lg border border-gray-300 px-4 py-2.5 text-base sm:text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-100"
           placeholder="How can we help you?"
         />
         <div className="flex items-center justify-between">
@@ -139,7 +139,7 @@ export function InitialForm({ onSubmit, isSubmitting, isCoolingDown = false }: I
       <button
         type="submit"
         disabled={isSubmitting || isCoolingDown}
-        className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300"
+        className="min-h-[44px] rounded-lg bg-blue-600 px-5 py-2.5 text-base sm:text-sm font-medium text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300"
       >
         {isCoolingDown ? "Please wait..." : isSubmitting ? "Sending..." : "Send Message"}
       </button>
