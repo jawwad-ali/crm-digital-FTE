@@ -46,7 +46,7 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Create docker-compose.yml with 4 services (api, web, postgres, redis) — health checks, depends_on conditions, volumes, port mappings (3000, 8000, 5432, 6379)
+- [x] T006 [US1] Create docker-compose.yml with 4 services (api, web, postgres, redis) — health checks, depends_on conditions, volumes, port mappings (3000, 8000, 5432, 6379)
 - [ ] T007 [US1] Verify: `docker compose up --build` starts all services within 120s, web form at localhost:3000 works end-to-end
 
 **Checkpoint**: MVP complete — single-command local startup with auto DB initialization

@@ -1,0 +1,125 @@
+# =============================================================================
+# CRM Digital FTE — Local Development Environment
+#
+# Services: API (FastAPI) + Frontend (Next.js) + PostgreSQL + Redis
+#
+# Usage:
+#   docker compose up --build          # Build and start everything
+#   docker compose up -d               # Start in background
+#   docker compose down                # Stop everything
+#   docker compose down -v             # Stop and delete data volumes
+#   docker compose logs -f api         # Follow API logs
+#   docker compose ps                  # Show service status
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — Primary CRM database with pgvector extension
+  # Data persists in a named volume across container restarts.
+  # Schema auto-applies on first startup via entrypoint init script.
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: crm
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Init scripts run on FIRST startup only (when data volume is empty)
+      # Executed in alphabetical order; supports .sql, .sql.gz, .sh
+      - ./database/migrations/001_initial_schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d crm"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # Redis — Cache and async job store
+  # AOF persistence ensures in-flight jobs survive restarts.
+  # User requirement: Redis must be highly available — data loss unacceptable.
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes --appendfsync everysec
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # API — FastAPI backend (Python 3.12)
+  # Waits for postgres and redis to be healthy before starting.
+  # Env vars override container networking (service names, not localhost).
+  # ---------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/crm
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # ---------------------------------------------------------------------------
+  # Web — Next.js frontend
+  # Waits for API to be healthy before starting.
+  # NEXT_PUBLIC_API_URL is baked into the JS bundle at build time.
+  # ---------------------------------------------------------------------------
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      target: runner
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "const http = require('http'); const req = http.get('http://localhost:3000', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }); req.on('error', () => process.exit(1));"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+# =============================================================================
+# Named volumes — Docker manages the storage location on the host.
+# Data persists across container restarts and docker compose stop/start.
+# Only deleted with: docker compose down -v
+# =============================================================================
+volumes:
+  postgres_data:
+    name: crm_postgres_data
+  redis_data:
+    name: crm_redis_data
