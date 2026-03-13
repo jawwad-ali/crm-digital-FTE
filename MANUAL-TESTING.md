@@ -18,7 +18,7 @@ wsl redis-cli ping
 ### 2. Start the Backend (FastAPI)
 
 ```bash
-cd D:\crm-digital-FTE
+cd D:\ai-customer-support-agent
 .venv\Scripts\activate
 uvicorn api.main:app --reload
 ```
@@ -28,7 +28,7 @@ Backend runs at `http://localhost:8000`. Verify with `GET http://localhost:8000/
 ### 3. Start the Frontend (Next.js)
 
 ```bash
-cd D:\crm-digital-FTE\web
+cd D:\ai-customer-support-agent\web
 npm run dev
 ```
 

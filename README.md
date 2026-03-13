@@ -1,3 +1,9 @@
+# CRM Digital FTE — AI Customer Support Agent | Multi-Channel Helpdesk with Semantic Search
+
+> Open-source **AI customer support platform** that handles **Gmail**, **WhatsApp**, and **Web** inquiries automatically. Built with **OpenAI Agents SDK**, **FastAPI**, **PostgreSQL + pgvector** for semantic knowledge base search, **Redis** for async job processing, and **Next.js** for the web interface. **258 automated tests**. Production-ready with **Docker** and **Kubernetes**.
+
+If this project is useful, please consider giving it a **star** — it helps others discover it.
+
 <div align="center">
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/downloads/)
@@ -6,21 +12,22 @@
 [![OpenAI Agents SDK](https://img.shields.io/badge/OpenAI_Agents_SDK-0.0.16+-412991.svg?logo=openai&logoColor=white)](https://github.com/openai/openai-agents-python)
 [![PostgreSQL + pgvector](https://img.shields.io/badge/PostgreSQL-pgvector-4169E1.svg?logo=postgresql&logoColor=white)](https://github.com/pgvector/pgvector)
 [![Redis](https://img.shields.io/badge/Redis-caching-DC382D.svg?logo=redis&logoColor=white)](https://redis.io/)
-[![CI](https://github.com/jawwad-ali/crm-digital-FTE/actions/workflows/ci.yml/badge.svg)](https://github.com/jawwad-ali/crm-digital-FTE/actions/workflows/ci.yml)
+[![CI](https://github.com/jawwad-ali/ai-customer-support-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/jawwad-ali/ai-customer-support-agent/actions/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/tests-258%20passing-brightgreen.svg)](#testing)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 </div>
 
-# CRM Digital FTE — AI Customer Success Agent
-
-> A 24/7 **AI customer support agent** that handles **Gmail**, **WhatsApp**, and **Web Form** inquiries using the **OpenAI Agents SDK**, **FastAPI**, **PostgreSQL + pgvector** for semantic search, **Redis** for caching and async job management, and a **Next.js** web interface — all in one monorepo.
+<p align="center">
+  <img src="support-center-screenshot.png" alt="AI Customer Support Chat Interface — Next.js web form with real-time status, conversation threading, and WCAG 2.1 AA accessibility" width="700">
+</p>
 
 ---
 
 ## Table of Contents
 
 - [What is this?](#what-is-this)
+- [Why Use This?](#why-use-this)
 - [Architecture](#architecture)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
@@ -28,6 +35,7 @@
 - [Project Structure](#project-structure)
 - [Testing](#testing)
 - [API Endpoints](#api-endpoints)
+- [Deployment](#deployment)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -45,9 +53,20 @@ CRM Digital FTE is a full-stack **AI-powered customer success platform** that au
 
 The system processes requests **asynchronously** via background tasks with Redis job polling, falling back to synchronous mode gracefully when Redis is unavailable.
 
-<p align="center">
-  <img src="support-center-screenshot.png" alt="CRM Digital FTE — AI Customer Support Center Web Form Screenshot" width="700">
-</p>
+---
+
+## Why Use This?
+
+| Feature | This Project | Typical Chatbot | Traditional Helpdesk |
+|---------|-------------|----------------|---------------------|
+| Semantic search (pgvector) | ✅ | ❌ keyword only | ❌ |
+| Multi-channel unified agent | ✅ Gmail + WhatsApp + Web | Separate bots | Manual routing |
+| OpenAI Agents SDK with function tools | ✅ | Raw API calls | N/A |
+| Async background processing | ✅ Redis job queue | Synchronous | Synchronous |
+| Built-in CRM (PostgreSQL) | ✅ | Requires integration | Separate system |
+| Production-ready (Docker + K8s) | ✅ | Dev-only | SaaS lock-in |
+| 258 automated tests | ✅ | Rarely tested | Proprietary |
+| Open-source (MIT) | ✅ | Often proprietary | Proprietary |
 
 ---
 
@@ -123,7 +142,18 @@ The system processes requests **asynchronously** via background tasks with Redis
 
 ## Getting Started
 
-### Prerequisites
+### Quick Start with Docker
+
+```bash
+git clone https://github.com/jawwad-ali/ai-customer-support-agent.git
+cd ai-customer-support-agent
+cp .env.example .env   # Add your OPENAI_API_KEY
+docker compose up
+```
+
+Backend at `http://localhost:8000` | Frontend at `http://localhost:3000`
+
+### Prerequisites (Manual Setup)
 
 - Python 3.12+
 - Node.js 20+
@@ -135,8 +165,8 @@ The system processes requests **asynchronously** via background tasks with Redis
 
 ```bash
 # Clone the repository
-git clone https://github.com/jawwad-ali/crm-digital-FTE.git
-cd crm-digital-FTE
+git clone https://github.com/jawwad-ali/ai-customer-support-agent.git
+cd ai-customer-support-agent
 
 # Set up Python environment
 uv venv
@@ -173,7 +203,7 @@ Open `http://localhost:3000` — the support form is ready.
 ## Project Structure
 
 ```
-crm-digital-FTE/
+ai-customer-support-agent/
 ├── agent/                    # AI agent engine
 │   ├── customer_success_agent.py   # Agent definition + runner
 │   ├── prompts.py                  # System prompt
@@ -195,11 +225,12 @@ crm-digital-FTE/
 │       └── lib/               # API client, types
 ├── database/
 │   └── migrations/            # Schema + KB seed data
+├── k8s/                       # Kubernetes manifests (namespace, configmap, secret)
 ├── tests/                     # 177 backend tests (pytest)
 ├── docs/
 │   ├── hackathon-spec.md      # Full project specification
 │   └── scaling-notes.md       # Production scaling guide
-└── specs/                     # Feature specs (001–005)
+└── docker-compose.yml         # One-command local dev environment
 ```
 
 ---
@@ -237,11 +268,31 @@ All tests use mocks (no real database, Redis, or OpenAI calls required):
 
 ---
 
+## Deployment
+
+### Docker
+
+```bash
+docker compose up       # Local development (API + Frontend + PostgreSQL + Redis)
+```
+
+### Kubernetes
+
+Production-ready manifests in [`k8s/`](k8s/):
+- Namespace, ConfigMap, Secret manifests
+- Health probes: `/health/live` (liveness) + `/health/ready` (readiness)
+
+See [docs/scaling-notes.md](docs/scaling-notes.md) for production scaling guidance.
+
+---
+
 ## Contributing
 
 Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code style guidelines, and the PR process.
 
-If this project helps you, consider giving it a **star** — it helps others discover it too.
+---
+
+If this project helped you, consider giving it a **star** — it helps others discover it too.
 
 ---
 
