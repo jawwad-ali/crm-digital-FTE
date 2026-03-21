@@ -1,5 +1,5 @@
 [project]
-name = "crm-digital-fte"
+name = "ai-customer-support-agent"
 version = "0.1.0"
 description = "24/7 AI Customer Success agent — Gmail, WhatsApp, Web Form support backed by PostgreSQL"
 readme = "README.md"

@@ -1,4 +1,4 @@
-# Contributing to CRM Digital FTE
+# Contributing to AI Customer Support Agent
 
 Thank you for your interest in contributing! This guide will help you get set up and submit your first pull request.
 
@@ -15,8 +15,8 @@ Thank you for your interest in contributing! This guide will help you get set up
 ### Installation
 
 ```bash
-git clone https://github.com/jawwad-ali/crm-digital-FTE.git
-cd crm-digital-FTE
+git clone https://github.com/jawwad-ali/ai-customer-support-agent.git
+cd ai-customer-support-agent
 
 # Python backend
 uv venv && source .venv/bin/activate
@@ -48,7 +48,7 @@ cd web && npm test
 
 ## Finding Your First Contribution
 
-Look for issues labeled [`good first issue`](https://github.com/jawwad-ali/crm-digital-FTE/labels/good%20first%20issue) — these are scoped, well-documented tasks ideal for new contributors.
+Look for issues labeled [`good first issue`](https://github.com/jawwad-ali/ai-customer-support-agent/labels/good%20first%20issue) — these are scoped, well-documented tasks ideal for new contributors.
 
 ## Branch Naming
 
@@ -75,4 +75,4 @@ We use descriptive commit messages with emoji prefixes:
 
 ## Questions?
 
-Open an [issue](https://github.com/jawwad-ali/crm-digital-FTE/issues) or start a discussion — we're happy to help.
+Open an [issue](https://github.com/jawwad-ali/ai-customer-support-agent/issues) or start a discussion — we're happy to help.
