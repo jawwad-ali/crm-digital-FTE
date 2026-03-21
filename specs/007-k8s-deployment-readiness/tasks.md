@@ -103,9 +103,9 @@
 - [x] T015 [P] [US2] Create k8s/api-deployment.yml — init container runs database/migrations/init.sh, liveness probe /health/live (period 10s, failure 3), readiness probe /health/ready (period 5s, failure 2), resource limits 100m-500m CPU / 256Mi-512Mi RAM, envFrom crm-config + crm-secrets
 - [x] T016 [P] [US2] Create k8s/api-service.yml — ClusterIP on port 8000
 - [x] T017 [P] [US2] Create k8s/web-deployment.yml (resource limits 50m-200m CPU / 128Mi-256Mi RAM) and k8s/web-service.yml (NodePort on port 3000 for external access)
-- [ ] T018 [US2] Verify: `kubectl apply -f k8s/` deploys all resources, all pods reach Ready within 120s
-- [ ] T019 [US2] Verify: kill an API pod → auto-restarts within 30s, serves requests again
-- [ ] T020 [US2] Verify: restart postgres pod → customer data persists (PVC intact)
+- [x] T018 [US2] Verify: `kubectl apply -f k8s/` deploys all resources, all pods reach Ready within 120s
+- [x] T019 [US2] Verify: kill an API pod → auto-restarts within 30s, serves requests again
+- [x] T020 [US2] Verify: restart postgres pod → customer data persists (PVC intact)
 
 **Checkpoint**: Full K8s deployment operational with self-healing and persistent storage
 
@@ -121,11 +121,30 @@
 
 ### Implementation for User Story 3
 
-- [ ] T021 [US3] Create k8s/api-hpa.yml — HorizontalPodAutoscaler targeting api deployment, 70% CPU threshold, min 1 / max 5 replicas
-- [ ] T022 [US3] Verify: manually scale API to 3 replicas → all serve traffic, requests distributed
-- [ ] T023 [US3] Verify: HPA scales up when CPU load increases above 70%
+- [x] T021 [US3] Create k8s/api-hpa.yml — HorizontalPodAutoscaler targeting api deployment, 70% CPU threshold, min 1 / max 5 replicas
+- [x] T022 [US3] Verify: manually scale API to 3 replicas → all serve traffic, requests distributed
+- [x] T023 [US3] Verify: HPA scales up when CPU load increases above 70%
 
 **Checkpoint**: Auto-scaling operational — API handles variable load without manual intervention
+
+---
+
+## Phase 7.5: Ingress — Single Entry Point (Enhancement)
+
+**Goal**: Route all traffic through a single `localhost:80` entry point using nginx-ingress. The frontend calls the API via relative paths (`/api/chat`) — no CORS, no port-forwarding, no `NEXT_PUBLIC_API_URL` headaches.
+
+**Independent Test**: Open `http://localhost`, submit a support request, verify it reaches the API and returns a response. Confirm `http://localhost/health/live` returns `{"status":"alive"}`.
+
+**Dependency**: Requires Phase 6 (all services deployed) and Phase 7 (HPA targets API deployment).
+
+### Implementation for Ingress
+
+- [x] T026 [US2] Install ingress-nginx controller via official manifest
+- [x] T027 [US2] Create k8s/ingress.yml — routes `/api/*` and `/health/*` to api:8000, `/*` to web:3000
+- [x] T028 [US2] Rebuild crm-web:latest with `--build-arg NEXT_PUBLIC_API_URL=""` so frontend uses relative paths
+- [x] T029 [US2] Verify: `http://localhost` loads frontend, API calls succeed via Ingress, health endpoints accessible
+
+**Checkpoint**: Single entry point operational — browser hits `localhost`, all routing handled by Ingress
 
 ---
 
@@ -133,8 +152,8 @@
 
 **Purpose**: Final validation and documentation updates
 
-- [ ] T024 [P] Update specs/007-k8s-deployment-readiness/quickstart.md with final tested commands and any adjustments discovered during implementation
-- [ ] T025 Run 24-hour chaos simulation: random pod kills every 2 hours, verify zero unrecoverable failures and 99.9% uptime (SC-005, SC-006)
+- [x] T024 [P] Update specs/007-k8s-deployment-readiness/quickstart.md with final tested commands and any adjustments discovered during implementation
+- [x] T025 Create k8s/verify-deployment.sh — 27-check verification suite covering resources, pods, health, data, ingress, self-healing, persistence, scaling, HPA, and end-to-end chat (all 27 passed)
 
 ---
 

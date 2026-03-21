@@ -44,8 +44,15 @@ spec:
                   sql = pathlib.Path("database/migrations/001_initial_schema.sql").read_text()
                   conn = await asyncpg.connect(url)
                   try:
-                      await conn.execute(sql)
-                      print("[db-migrate] Schema migration complete.")
+                      # Check if schema already exists (idempotent)
+                      exists = await conn.fetchval(
+                          "SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name='customers')"
+                      )
+                      if exists:
+                          print("[db-migrate] Schema already exists — skipping.")
+                      else:
+                          await conn.execute(sql)
+                          print("[db-migrate] Schema migration complete.")
                   finally:
                       await conn.close()
 
